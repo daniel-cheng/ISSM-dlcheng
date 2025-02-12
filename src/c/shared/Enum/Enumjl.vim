@@ -932,6 +932,11 @@ syn keyword juliaConstC DebrisMaskNodeActivationEnum
 syn keyword juliaConstC IceEnum
 syn keyword juliaConstC IceMaskNodeActivationEnum
 syn keyword juliaConstC InputEnum
+syn keyword juliaConstC InitialThicknessEnum
+syn keyword juliaConstC InitialFrictionCoefficientEnum
+syn keyword juliaConstC InitialMaterialsRheologyBEnum
+syn keyword juliaConstC InitialBasalforcingsFloatingiceMeltingRateEnum
+syn keyword juliaConstC InitialSmbEnum
 syn keyword juliaConstC InversionCostFunctionsCoefficientsEnum
 syn keyword juliaConstC InversionSurfaceObsEnum
 syn keyword juliaConstC InversionThicknessObsEnum
@@ -1310,6 +1315,11 @@ syn keyword juliaConstC WeightsMeltObservationEnum
 syn keyword juliaConstC WeightsVxObservationEnum
 syn keyword juliaConstC WeightsVyObservationEnum
 syn keyword juliaConstC WeightsSurfaceObservationEnum
+syn keyword juliaConstC WeightsInitialThicknessEnum
+syn keyword juliaConstC WeightsInitialFrictionCoefficientEnum
+syn keyword juliaConstC WeightsInitialMaterialsRheologyBEnum
+syn keyword juliaConstC WeightsInitialBasalforcingsFloatingiceMeltingRateEnum
+syn keyword juliaConstC WeightsInitialSmbEnum
 syn keyword juliaConstC OldAccumulatedDeltaBottomPressureEnum
 syn keyword juliaConstC OldAccumulatedDeltaIceThicknessEnum
 syn keyword juliaConstC OldAccumulatedDeltaTwsEnum

@@ -23,13 +23,13 @@ class GenericExternalResult: public ExternalResult {
 	private: 
 		int        id;
 		char*      result_name;
-		ResultType value;
 		int        M;
 		int        N;
 		int        step;
 		IssmDouble time;
 
 	public:
+		ResultType value;
 		/*Diverse: must be in front, as it is used in what follows*/
 		void GenericEcho(void){/*{{{*/
 			_printf_("   id          : " << this->id << "\n");
@@ -75,7 +75,7 @@ class GenericExternalResult: public ExternalResult {
 			time        = 0;
 			value       = 0;
 		} /*}}}*/
-		GenericExternalResult(int in_id, int in_enum_type,ResultType in_values, int in_M,int in_N,int in_step=UNDEF,IssmDouble in_time=UNDEF){/*{{{*/
+		GenericExternalResult(int in_id, int in_enum_type,ResultType in_values, int in_M,int in_N,int in_step,IssmDouble in_time){/*{{{*/
 			id        = in_id;
 			step      = in_step;
 			time      = in_time;
@@ -204,11 +204,15 @@ int GetResultEnum(void){ /*{{{*/
 int   GetStep(void){ /*{{{*/
 	return this->step;
 } /*}}}*/
-double GetValue(void){ /*{{{*/
+void SetValue(IssmDouble in_value){ /*{{{*/
 	/*Only supported by IssmPDouble result, error out by default*/
 	_error_("not supported for this type of result");
 } /*}}}*/
-double* GetValues(void){ /*{{{*/
+IssmDouble GetValue(void){ /*{{{*/
+	/*Only supported by IssmPDouble result, error out by default*/
+	_error_("not supported for this type of result");
+} /*}}}*/
+IssmDouble* GetValues(void){ /*{{{*/
 	/*Only supported by IssmPDouble* result, error out by default*/
 	_error_("not supported for this type of result");
 } /*}}}*/
@@ -256,8 +260,11 @@ template <> inline void GenericExternalResult<double>::DeepEcho(void){ /*{{{*/
 template <> inline int GenericExternalResult<double>::ObjectEnum(void){ /*{{{*/
 	return DoubleExternalResultEnum;
 } /*}}}*/
-template <> inline double GenericExternalResult<double>::GetValue(void){ /*{{{*/
+template <> inline IssmDouble GenericExternalResult<IssmDouble>::GetValue(void){ /*{{{*/
 	return value;
+} /*}}}*/
+template <> inline void GenericExternalResult<IssmDouble>::SetValue(IssmDouble in_value){ /*{{{*/
+	value = in_value;
 } /*}}}*/
 template <> inline void GenericExternalResult<double>::Marshall(MarshallHandle* marshallhandle){/*{{{*/
 	this->GenericMarshall(marshallhandle);
@@ -582,9 +589,9 @@ template <> inline void GenericExternalResult<IssmPDouble*>::WriteData(FILE* fid
 template <> inline int GenericExternalResult<IssmPDouble*>::ObjectEnum(void){ /*{{{*/
 	return DoubleMatExternalResultEnum;
 } /*}}}*/
-template <> inline double* GenericExternalResult<IssmPDouble*>::GetValues(void){ /*{{{*/
-	return value;
-} /*}}}*/
+//template <> inline double* GenericExternalResult<IssmPDouble*>::GetValues(void){ /*{{{*/
+//	return value;
+//} /*}}}*/
 template <> inline void GenericExternalResult<IssmPDouble*>::Marshall(MarshallHandle* marshallhandle){/*{{{*/
 
 	int object_enum = this->ObjectEnum();

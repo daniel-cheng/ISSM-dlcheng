@@ -87,6 +87,25 @@ ExternalResult* Results::FindResult(int result_enum){/*{{{*/
 	return NULL;
 }
 /*}}}*/
+ExternalResult* Results::FindResult(const char* result_name, int result_step){/*{{{*/
+
+	int test_count = 0;
+	for(Object* &object : this->objects){
+		ExternalResult* result=xDynamicCast<ExternalResult*>(object);
+		char* 	name = result->GetResultName();
+		int		step = result->GetStep();
+		test_count++;
+		if(result->GetStep()==result_step){
+			if(strcmp(name,result_name)==0){
+				xDelete<char>(name);
+				return result;
+			}
+		}
+		xDelete<char>(name);
+	}
+	return NULL;
+}
+/*}}}*/
 void Results::Write(Parameters* parameters){/*{{{*/
 
 	FILE       *fid  = NULL;

@@ -939,6 +939,11 @@ syn keyword cConstant DebrisMaskNodeActivationEnum
 syn keyword cConstant IceEnum
 syn keyword cConstant IceMaskNodeActivationEnum
 syn keyword cConstant InputEnum
+syn keyword cConstant InitialThicknessEnum
+syn keyword cConstant InitialFrictionCoefficientEnum
+syn keyword cConstant InitialMaterialsRheologyBEnum
+syn keyword cConstant InitialBasalforcingsFloatingiceMeltingRateEnum
+syn keyword cConstant InitialSmbEnum
 syn keyword cConstant InversionCostFunctionsCoefficientsEnum
 syn keyword cConstant InversionSurfaceObsEnum
 syn keyword cConstant InversionThicknessObsEnum
@@ -1317,6 +1322,11 @@ syn keyword cConstant WeightsMeltObservationEnum
 syn keyword cConstant WeightsVxObservationEnum
 syn keyword cConstant WeightsVyObservationEnum
 syn keyword cConstant WeightsSurfaceObservationEnum
+syn keyword cConstant WeightsInitialThicknessEnum
+syn keyword cConstant WeightsInitialFrictionCoefficientEnum
+syn keyword cConstant WeightsInitialMaterialsRheologyBEnum
+syn keyword cConstant WeightsInitialBasalforcingsFloatingiceMeltingRateEnum
+syn keyword cConstant WeightsInitialSmbEnum
 syn keyword cConstant OldAccumulatedDeltaBottomPressureEnum
 syn keyword cConstant OldAccumulatedDeltaIceThicknessEnum
 syn keyword cConstant OldAccumulatedDeltaTwsEnum
@@ -1921,6 +1931,7 @@ syn keyword cType Matlitho
 syn keyword cType matrixobjects
 syn keyword cType MatrixParam
 syn keyword cType Misfit
+syn keyword cType MisfitAnnual
 syn keyword cType Moulin
 syn keyword cType Neumannflux
 syn keyword cType Nodalvalue
@@ -1959,7 +1970,6 @@ syn keyword cType SpcTransient
 syn keyword cType SphericalVariogram
 syn keyword cType StringArrayParam
 syn keyword cType StringParam
-syn keyword cType TEMP
 syn keyword cType Tetra
 syn keyword cType TetraRef
 syn keyword cType TransientArrayParam

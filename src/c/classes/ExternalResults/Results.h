@@ -23,6 +23,7 @@ class Results: public DataSet{
 		int AddResult(ExternalResult* result);
 		int DeleteResult(int result_enum,int result_step);
 		ExternalResult* FindResult(int result_enum);
+		ExternalResult* FindResult(const char* result_name, int result_step);
 		void Write(Parameters* parameters);
 };
 #endif //ifndef _RESULTS_H_

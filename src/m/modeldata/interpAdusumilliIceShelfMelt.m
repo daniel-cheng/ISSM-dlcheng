@@ -1,4 +1,4 @@
-function output = interpAdusumilliIceShelfMelt(X,Y)
+function [output, output_err] = interpAdusumilliIceShelfMelt(X,Y)
 %INTERPADUSUMILLIICESHELFMELT - imports basal melt rates from (Adusumilli et al., 2020).
 %   About the data: "Average basal melt rates for Antarctic ice shelves for the 2010–2018 period at 
 %   high spatial resolution, estimated using CryoSat-2 data. This data file was last updated on 2020-06-11."
@@ -13,9 +13,11 @@ function output = interpAdusumilliIceShelfMelt(X,Y)
 % define path and filename for this machine
 switch (oshostname()),
 	case {'totten'}
-		filename = '/totten_1/ModelData/Antarctica/Adusumilli2020IceShelfMelt/ANT_iceshelf_melt_rates_CS2_2010-2018_v0.h5';
-	case {'thwaites','larsen','astrid'}
-		filename = '/u/astrid-r1b/ModelData/Adusumilli2020IceShelfMelt/ANT_iceshelf_melt_rates_CS2_2010-2018_v0.h5';
+		filename ='/totten_1/ModelData/Antarctica/Adusumilli2020IceShelfMelt/ANT_iceshelf_melt_rates_CS2_2010-2018_v0.h5';
+	case {'larsen'}
+%ANT_iceshelf_height_changes_RA_1994_2018_v0.h5
+%ANT_iceshelf_melt_rates_CS2_2010-2018_v0.h5
+		filename ='/export/proj483/b/ModelData/Adusumilli2020IceShelfMelt/ANT_iceshelf_melt_rates_CS2_2010-2018_v0.h5';
 	otherwise
 		error('hostname not supported yet');
 end
@@ -32,9 +34,13 @@ ydata = double(h5read(filename,'/y'));
 %  mean melt rate measured at the same ice draft as the grid cell elsewhere on the ice shelf. 
 %  Ice draft was estimated using BedMachine data.'
 data = double(h5read(filename,'/w_b'));
+data_err = double(h5read(filename,'/w_b_uncert'));
 data_interp = double(h5read(filename,'/w_b_interp'));
 data = data';
+data_err = data_err';
 disp(['   -- Adusumilli Ice Shelf Melt: interpolating melt data']);
 data(isnan(data)) = data_interp(isnan(data));
 output = InterpFromGrid(xdata,ydata,data,X(:),Y(:));
+output_err = InterpFromGrid(xdata,ydata,data_err,X(:),Y(:));
 output = reshape(output,size(X,1),size(X,2));
+output_err = reshape(output_err,size(X,1),size(X,2));

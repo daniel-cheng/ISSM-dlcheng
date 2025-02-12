@@ -136,7 +136,7 @@ end
 
 %plot existing profile if any
 hold on
-disableDefaultInteractivity(gca); %disables the built-in interactions for the specified axes
+%disableDefaultInteractivity(gca); %disables the built-in interactions for the specified axes
 
 %Build backup structure for do and redo
 backup=cell(1,3);

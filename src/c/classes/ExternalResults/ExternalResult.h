@@ -26,7 +26,10 @@ class ExternalResult: public Object{
 		virtual int    GetResultEnum(void)=0;
 		virtual char*  GetResultName(void)=0;
 		virtual int    GetStep(void)=0;
-		virtual double GetValue(void)=0;
+		//virtual double GetValue(void)=0;
+		//virtual IssmPDouble GetValue(void)=0;
+		virtual IssmDouble GetValue(void)=0;
+		virtual void SetValue(IssmDouble in_value)=0;
 		virtual void   WriteData(FILE* fid,bool io_gather)=0;
 };
 #endif

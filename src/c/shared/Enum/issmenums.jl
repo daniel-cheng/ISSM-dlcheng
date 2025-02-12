@@ -928,6 +928,11 @@
 	IceEnum
 	IceMaskNodeActivationEnum
 	InputEnum
+	InitialThicknessEnum
+	InitialFrictionCoefficientEnum
+	InitialMaterialsRheologyBEnum
+	InitialBasalforcingsFloatingiceMeltingRateEnum
+	InitialSmbEnum
 	InversionCostFunctionsCoefficientsEnum
 	InversionSurfaceObsEnum
 	InversionThicknessObsEnum
@@ -1306,6 +1311,11 @@
 	WeightsVxObservationEnum
 	WeightsVyObservationEnum
 	WeightsSurfaceObservationEnum
+	WeightsInitialThicknessEnum
+	WeightsInitialFrictionCoefficientEnum
+	WeightsInitialMaterialsRheologyBEnum
+	WeightsInitialBasalforcingsFloatingiceMeltingRateEnum
+	WeightsInitialSmbEnum
 	OldAccumulatedDeltaBottomPressureEnum
 	OldAccumulatedDeltaIceThicknessEnum
 	OldAccumulatedDeltaTwsEnum
@@ -2754,6 +2764,11 @@ function EnumToString(enum::IssmEnum)
 	if(enum==IceEnum) return "Ice" end
 	if(enum==IceMaskNodeActivationEnum) return "IceMaskNodeActivation" end
 	if(enum==InputEnum) return "Input" end
+	if(enum==InitialThicknessEnum) return "InitialThickness" end
+	if(enum==InitialFrictionCoefficientEnum) return "InitialFrictionCoefficient" end
+	if(enum==InitialMaterialsRheologyBEnum) return "InitialMaterialsRheologyB" end
+	if(enum==InitialBasalforcingsFloatingiceMeltingRateEnum) return "InitialBasalforcingsFloatingiceMeltingRate" end
+	if(enum==InitialSmbEnum) return "InitialSmb" end
 	if(enum==InversionCostFunctionsCoefficientsEnum) return "InversionCostFunctionsCoefficients" end
 	if(enum==InversionSurfaceObsEnum) return "InversionSurfaceObs" end
 	if(enum==InversionThicknessObsEnum) return "InversionThicknessObs" end
@@ -3132,6 +3147,11 @@ function EnumToString(enum::IssmEnum)
 	if(enum==WeightsVxObservationEnum) return "WeightsVxObservation" end
 	if(enum==WeightsVyObservationEnum) return "WeightsVyObservation" end
 	if(enum==WeightsSurfaceObservationEnum) return "WeightsSurfaceObservation" end
+	if(enum==WeightsInitialThicknessEnum) return "WeightsInitialThickness" end
+	if(enum==WeightsInitialFrictionCoefficientEnum) return "WeightsInitialFrictionCoefficient" end
+	if(enum==WeightsInitialMaterialsRheologyBEnum) return "WeightsInitialMaterialsRheologyB" end
+	if(enum==WeightsInitialBasalforcingsFloatingiceMeltingRateEnum) return "WeightsInitialBasalforcingsFloatingiceMeltingRate" end
+	if(enum==WeightsInitialSmbEnum) return "WeightsInitialSmb" end
 	if(enum==OldAccumulatedDeltaBottomPressureEnum) return "OldAccumulatedDeltaBottomPressure" end
 	if(enum==OldAccumulatedDeltaIceThicknessEnum) return "OldAccumulatedDeltaIceThickness" end
 	if(enum==OldAccumulatedDeltaTwsEnum) return "OldAccumulatedDeltaTws" end
@@ -4580,6 +4600,11 @@ function StringToEnum(name::String)
 	if(name=="Ice") return IceEnum  end
 	if(name=="IceMaskNodeActivation") return IceMaskNodeActivationEnum  end
 	if(name=="Input") return InputEnum  end
+	if(name=="InitialThickness") return InitialThicknessEnum  end
+	if(name=="InitialFrictionCoefficient") return InitialFrictionCoefficientEnum  end
+	if(name=="InitialMaterialsRheologyB") return InitialMaterialsRheologyBEnum  end
+	if(name=="InitialBasalforcingsFloatingiceMeltingRate") return InitialBasalforcingsFloatingiceMeltingRateEnum  end
+	if(name=="InitialSmb") return InitialSmbEnum  end
 	if(name=="InversionCostFunctionsCoefficients") return InversionCostFunctionsCoefficientsEnum  end
 	if(name=="InversionSurfaceObs") return InversionSurfaceObsEnum  end
 	if(name=="InversionThicknessObs") return InversionThicknessObsEnum  end
@@ -4958,6 +4983,11 @@ function StringToEnum(name::String)
 	if(name=="WeightsVxObservation") return WeightsVxObservationEnum  end
 	if(name=="WeightsVyObservation") return WeightsVyObservationEnum  end
 	if(name=="WeightsSurfaceObservation") return WeightsSurfaceObservationEnum  end
+	if(name=="WeightsInitialThickness") return WeightsInitialThicknessEnum  end
+	if(name=="WeightsInitialFrictionCoefficient") return WeightsInitialFrictionCoefficientEnum  end
+	if(name=="WeightsInitialMaterialsRheologyB") return WeightsInitialMaterialsRheologyBEnum  end
+	if(name=="WeightsInitialBasalforcingsFloatingiceMeltingRate") return WeightsInitialBasalforcingsFloatingiceMeltingRateEnum  end
+	if(name=="WeightsInitialSmb") return WeightsInitialSmbEnum  end
 	if(name=="OldAccumulatedDeltaBottomPressure") return OldAccumulatedDeltaBottomPressureEnum  end
 	if(name=="OldAccumulatedDeltaIceThickness") return OldAccumulatedDeltaIceThicknessEnum  end
 	if(name=="OldAccumulatedDeltaTws") return OldAccumulatedDeltaTwsEnum  end
