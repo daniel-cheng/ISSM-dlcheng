@@ -123,38 +123,37 @@ IssmDouble Misfit::Response(FemModel* femmodel){/*{{{*/
 	 femmodel->parameters->FindParam(&dt,TimesteppingTimeStepEnum);
 
 	 if (this->local==1){ /*area integration using elements: {{{*/
+		IssmDouble misfit_t=0.;
+		IssmDouble all_misfit_t=0.;
+		IssmDouble area_t=0.;
+		IssmDouble all_area_t;
 
-		 IssmDouble misfit_t=0.;
-		 IssmDouble all_misfit_t=0.;
-		 IssmDouble area_t=0.;
-		 IssmDouble all_area_t;
+		/*If we are locked, return time average: */
+		if(this->lock) return misfit/(finaltime-starttime);
 
-		 /*If we are locked, return time average: */
-		 if(this->lock)return misfit/(time-starttime);
+		for(Object* & object : femmodel->elements->objects){
+			Element* element=xDynamicCast<Element*>(object);
+			misfit_t+=element->Misfit(model_enum,observation_enum,weights_enum);
+			area_t+=element->MisfitArea(weights_enum);
+		}
 
-		 for(Object* & object : femmodel->elements->objects){
-			 Element* element=xDynamicCast<Element*>(object);
-			 misfit_t+=element->Misfit(model_enum,observation_enum,weights_enum);
-			 area_t+=element->MisfitArea(weights_enum);
-		 }
+		ISSM_MPI_Allreduce ( (void*)&misfit_t,(void*)&all_misfit_t,1,ISSM_MPI_DOUBLE,ISSM_MPI_SUM,IssmComm::GetComm());
+		ISSM_MPI_Allreduce ( (void*)&area_t,(void*)&all_area_t,1,ISSM_MPI_DOUBLE,ISSM_MPI_SUM,IssmComm::GetComm());
+		area_t=all_area_t;
+		misfit_t=all_misfit_t;
 
-		 ISSM_MPI_Allreduce ( (void*)&misfit_t,(void*)&all_misfit_t,1,ISSM_MPI_DOUBLE,ISSM_MPI_SUM,IssmComm::GetComm());
-		 ISSM_MPI_Allreduce ( (void*)&area_t,(void*)&all_area_t,1,ISSM_MPI_DOUBLE,ISSM_MPI_SUM,IssmComm::GetComm());
-		 area_t=all_area_t;
-		 misfit_t=all_misfit_t;
+		/*Divide by surface area if not nill!: */
+		if (area_t!=0) misfit_t=misfit_t/area_t;
 
-		 /*Divide by surface area if not nill!: */
-		 if (area_t!=0) misfit_t=misfit_t/area_t;
+		/*Add this time's contribution to curent misfit: */
+		misfit+=dt*misfit_t;
 
-		 /*Add this time's contribution to curent misfit: */
-		 misfit+=dt*misfit_t;
+		/*Do we lock? i.e. are we at final_time? :*/
+		if(time==finaltime)this->lock=1;
 
-		 /*Do we lock? i.e. are we at final_time? :*/
-		 if(time==finaltime)this->lock=1;
-
-		 /*What we return is the value of misfit / time if transient*/
-		 if(time!=0.) return misfit/(time-starttime);
-		 return misfit;
+		/*What we return is the value of misfit / time if transient*/
+		if(time!=0.) return misfit/(finaltime-starttime);
+		return misfit;
 	 } /*}}}*/
 	 else if (this->local==2){ /*vertex by vertex computation: {{{*/
 

@@ -232,7 +232,7 @@ classdef materials < dynamicprops
 					md = checkfield(md,'fieldname','materials.rho_freshwater','>',0);
 					md = checkfield(md,'fieldname','materials.mu_water','>',0);
 					md = checkfield(md,'fieldname','materials.rheology_B','>',0,'timeseries',1,'NaN',1,'Inf',1);
-					md = checkfield(md,'fieldname','materials.rheology_n','>',0,'size',[md.mesh.numberofelements 1]);
+					md = checkfield(md,'fieldname','materials.rheology_n','>',0,'size',[md.mesh.numberofvertices 1]);
 					md = checkfield(md,'fieldname','materials.rheology_law','values',{'None' 'BuddJacka' 'Cuffey' 'CuffeyTemperate' 'Paterson' 'Arrhenius' 'LliboutryDuval' 'NyeCO2' 'NyeH2O'});
 				case 'litho'
 					if ~ismember('LoveAnalysis',analyses), return; end
@@ -244,16 +244,12 @@ classdef materials < dynamicprops
 					md = checkfield(md,'fieldname','materials.density','NaN',1,'Inf',1,'size',[md.materials.numlayers 1],'>',0);
 					md = checkfield(md,'fieldname','materials.viscosity','NaN',1,'Inf',1,'size',[md.materials.numlayers 1],'>=',0);
 					md = checkfield(md,'fieldname','materials.rheologymodel','NaN',1,'Inf',1,'size',[md.materials.numlayers 1],'>=',0,'<=',2);
-					if any(self.rheologymodel==1)
-						md = checkfield(md,'fieldname','materials.burgers_viscosity','Inf',1,'size',[md.materials.numlayers 1],'>=',0);
-						md = checkfield(md,'fieldname','materials.burgers_mu','Inf',1,'size',[md.materials.numlayers 1],'>=',0);
-					end
-					if any(self.rheologymodel==2)
-						md = checkfield(md,'fieldname','materials.ebm_alpha','Inf',1,'size',[md.materials.numlayers 1],'>=',0);
-						md = checkfield(md,'fieldname','materials.ebm_delta','Inf',1,'size',[md.materials.numlayers 1],'>=',0);
-						md = checkfield(md,'fieldname','materials.ebm_taul','Inf',1,'size',[md.materials.numlayers 1],'>=',0);
-						md = checkfield(md,'fieldname','materials.ebm_tauh','Inf',1,'size',[md.materials.numlayers 1],'>=',0);
-					end
+					md = checkfield(md,'fieldname','materials.burgers_viscosity','Inf',1,'size',[md.materials.numlayers 1],'>=',0);
+					md = checkfield(md,'fieldname','materials.burgers_mu','Inf',1,'size',[md.materials.numlayers 1],'>=',0);
+					md = checkfield(md,'fieldname','materials.ebm_alpha','Inf',1,'size',[md.materials.numlayers 1],'>=',0);
+					md = checkfield(md,'fieldname','materials.ebm_delta','Inf',1,'size',[md.materials.numlayers 1],'>=',0);
+					md = checkfield(md,'fieldname','materials.ebm_taul','Inf',1,'size',[md.materials.numlayers 1],'>=',0);
+					md = checkfield(md,'fieldname','materials.ebm_tauh','Inf',1,'size',[md.materials.numlayers 1],'>=',0);
 
 					for i=1:md.materials.numlayers,
 						if md.materials.rheologymodel(i)==1 & (isnan(md.materials.burgers_viscosity(i) | isnan(md.materials.burgers_mu(i)))),
@@ -306,7 +302,7 @@ classdef materials < dynamicprops
 					WriteData(fid,prefix,'object',self,'class','materials','fieldname','mixed_layer_capacity','format','Double');
 					WriteData(fid,prefix,'object',self,'class','materials','fieldname','thermal_exchange_velocity','format','Double');
 					WriteData(fid,prefix,'object',self,'class','materials','fieldname','rheology_B','format','DoubleMat','mattype',1,'timeserieslength',md.mesh.numberofvertices+1,'yts',md.constants.yts);
-					WriteData(fid,prefix,'object',self,'class','materials','fieldname','rheology_n','format','DoubleMat','mattype',2);
+					WriteData(fid,prefix,'object',self,'class','materials','fieldname','rheology_n','format','DoubleMat','mattype',1);
 					WriteData(fid,prefix,'data',self.rheology_law,'name','md.materials.rheology_law','format','String');
 				case 'litho'
 					WriteData(fid,prefix,'object',self,'class','materials','fieldname','numlayers','format','Integer');
@@ -346,7 +342,7 @@ classdef materials < dynamicprops
 				switch nat
 				case 'ice'
 					self.rheology_B=project3d(md,'vector',self.rheology_B,'type','node');
-					self.rheology_n=project3d(md,'vector',self.rheology_n,'type','element');
+					self.rheology_n=project3d(md,'vector',self.rheology_n,'type','node');
 				end
 			end
 		end % }}}
@@ -505,6 +501,7 @@ classdef materials < dynamicprops
 			vs = 0.;
 
 			for i = 1:13
+
 				r1 = 0.;
 				r2 = 0.;
 				if ((rad(j) > r(i)) & (rad(j) <= r(i+1))) 

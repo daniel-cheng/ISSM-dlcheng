@@ -153,6 +153,98 @@ void CreateOutputDefinitions(Elements* elements,Parameters* parameters,Inputs* i
 				xDelete<char*>(misfit_weights_string_s);
 				/*}}}*/
 			}
+			else if (output_definition_enums[i]==MisfitannualEnum){
+				/*Deal with misfits: {{{*/
+
+				/*misfit variables: */
+				int          nummisfits;
+				char**       misfit_name_s						= NULL;    
+				char**		 misfit_definitionstring_s		= NULL;    
+				char**       misfit_model_string_s			= NULL;
+				IssmDouble** misfit_observation_s			= NULL;
+				char**		 misfit_observation_string_s	= NULL;
+				int*         misfit_observation_M_s			= NULL;
+				int*         misfit_observation_N_s			= NULL;
+				int*         misfit_local_s					= NULL;
+				char**       misfit_timeinterpolation_s	= NULL;
+				IssmDouble** misfit_weights_s					= NULL;
+				int*         misfit_weights_M_s				= NULL;
+				int*         misfit_weights_N_s				= NULL;
+				char**       misfit_weights_string_s		= NULL;
+
+				/*Fetch name, model_string, observation, observation_string, etc ... (see src/m/classes/misfit.m): */
+				iomodel->FetchMultipleData(&misfit_name_s,&nummisfits,                                                        "md.misfitannual.name");
+				iomodel->FetchMultipleData(&misfit_definitionstring_s,&nummisfits,                                            "md.misfitannual.definitionstring");
+				iomodel->FetchMultipleData(&misfit_model_string_s,&nummisfits,                                                "md.misfitannual.model_string");
+				iomodel->FetchMultipleData(&misfit_observation_s,&misfit_observation_M_s,&misfit_observation_N_s,&nummisfits, "md.misfitannual.observation");
+				iomodel->FetchMultipleData(&misfit_observation_string_s,&nummisfits,                                          "md.misfitannual.observation_string");
+				iomodel->FetchMultipleData(&misfit_timeinterpolation_s,&nummisfits,                                           "md.misfitannual.timeinterpolation");
+				iomodel->FetchMultipleData(&misfit_local_s,&nummisfits,                                                       "md.misfitannual.local");
+				iomodel->FetchMultipleData(&misfit_weights_s,&misfit_weights_M_s,&misfit_weights_N_s,&nummisfits,             "md.misfitannual.weights");
+				iomodel->FetchMultipleData(&misfit_weights_string_s,&nummisfits,                                              "md.misfitannual.weights_string");
+
+				for(j=0;j<nummisfits;j++){
+
+					int obs_vector_type=0;
+					if ((misfit_observation_M_s[j]==iomodel->numberofvertices) || (misfit_observation_M_s[j]==iomodel->numberofvertices+1)){
+						obs_vector_type=1;
+					}
+					else if ((misfit_observation_M_s[j]==iomodel->numberofelements) || (misfit_observation_M_s[j]==iomodel->numberofelements+1)){
+						obs_vector_type=2;
+					}
+					else
+					 _error_("misfit observation size not supported yet");
+
+					int weight_vector_type=0;
+					if ((misfit_weights_M_s[j]==iomodel->numberofvertices) || (misfit_weights_M_s[j]==iomodel->numberofvertices+1)){
+						weight_vector_type=1;
+					}
+					else if ((misfit_weights_M_s[j]==iomodel->numberofelements) || (misfit_weights_M_s[j]==iomodel->numberofelements+1)){
+						weight_vector_type=2;
+					}
+					else
+					 _error_("misfit weight size not supported yet");
+
+					/*First create a misfit object for that specific string (misfit_model_string_s[j]):*/
+					output_definitions->AddObject(new MisfitAnnual(misfit_name_s[j],StringToEnumx(misfit_definitionstring_s[j]),StringToEnumx(misfit_model_string_s[j]),StringToEnumx(misfit_observation_string_s[j]),misfit_timeinterpolation_s[j],misfit_local_s[j],StringToEnumx(misfit_weights_string_s[j])));
+
+					/*Now, for this particular misfit object, make sure we plug into the elements: the observation, and the weights.*/
+					for(Object* & object : elements->objects){
+						Element* element=xDynamicCast<Element*>(object);
+						element->InputCreate(misfit_observation_s[j],inputs,iomodel,misfit_observation_M_s[j],misfit_observation_N_s[j],obs_vector_type,StringToEnumx(misfit_observation_string_s[j]),7);
+						element->InputCreate(misfit_weights_s[j],inputs,iomodel,misfit_weights_M_s[j],misfit_weights_N_s[j],weight_vector_type,StringToEnumx(misfit_weights_string_s[j]),7);
+					}
+
+				}
+
+				/*Free resources:*/
+				for(j=0;j<nummisfits;j++){
+					char* string=NULL;
+					IssmDouble* matrix = NULL;
+					string = misfit_definitionstring_s[j];		xDelete<char>(string);
+					string = misfit_observation_string_s[j];	xDelete<char>(string);
+					string = misfit_model_string_s[j];			xDelete<char>(string);
+					string = misfit_weights_string_s[j];		xDelete<char>(string);
+					string = misfit_name_s[j];    xDelete<char>(string);
+					string = misfit_timeinterpolation_s[j];    xDelete<char>(string);
+					matrix = misfit_observation_s[j]; xDelete<IssmDouble>(matrix);
+					matrix = misfit_weights_s[j]; xDelete<IssmDouble>(matrix);
+				}
+				xDelete<char*>(misfit_name_s);
+				xDelete<char*>(misfit_model_string_s);
+				xDelete<char*>(misfit_definitionstring_s);
+				xDelete<IssmDouble*>(misfit_observation_s);
+				xDelete<char*>(misfit_observation_string_s);
+				xDelete<int>(misfit_observation_M_s);
+				xDelete<int>(misfit_observation_N_s);
+				xDelete<int>(misfit_local_s);
+				xDelete<char*>(misfit_timeinterpolation_s);
+				xDelete<IssmDouble*>(misfit_weights_s);
+				xDelete<int>(misfit_weights_M_s);
+				xDelete<int>(misfit_weights_N_s);
+				xDelete<char*>(misfit_weights_string_s);
+				/*}}}*/
+			}
 			else if (output_definition_enums[i]==CfsurfacesquareEnum){
 				/*Deal with cfsurfacesquare: {{{*/
 

@@ -2331,8 +2331,8 @@ void FemModel::OutputControlsx(Results **presults){/*{{{*/
 		}
 
 		/*Allocate vector*/
-		Vector<IssmPDouble> *vector_control  = new Vector<IssmPDouble>(M[i]*N[i]);
-		Vector<IssmPDouble> *vector_gradient = new Vector<IssmPDouble>(M[i]*N[i]);
+		Vector<IssmDouble> *vector_control  = new Vector<IssmDouble>(M[i]*N[i]);
+		Vector<IssmDouble> *vector_gradient = new Vector<IssmDouble>(M[i]*N[i]);
 
 		/*Fill in vector*/
 		for(Object* & object : this->elements->objects){
@@ -2342,8 +2342,8 @@ void FemModel::OutputControlsx(Results **presults){/*{{{*/
 		vector_control->Assemble();
 		vector_gradient->Assemble();
 
-		results->AddResult(new GenericExternalResult<Vector<IssmPDouble>*>(results->Size()+1,control_enum,vector_control ,step,time));
-		results->AddResult(new GenericExternalResult<Vector<IssmPDouble>*>(results->Size()+1,gradient_enum,vector_gradient,step,time));
+		results->AddResult(new GenericExternalResult<Vector<IssmDouble>*>(results->Size()+1,control_enum,vector_control ,step,time));
+		results->AddResult(new GenericExternalResult<Vector<IssmDouble>*>(results->Size()+1,gradient_enum,vector_gradient,step,time));
 	}
 
 	/*Clean up and return*/
@@ -2366,7 +2366,7 @@ void FemModel::RequestedDependentsx(void){/*{{{*/
 		parameters->FindParam(&num_dependents,AutodiffNumDependentsEnum);
 		parameters->FindParam(&dependent_objects,AutodiffDependentObjectsEnum);
 		if(num_dependents){
-			IssmPDouble* dependents=xNew<IssmPDouble>(num_dependents);
+			IssmDouble* dependents=xNew<IssmDouble>(num_dependents);
 
 			/*Go through our dependent variables, and compute the response:*/
 			int my_rank=IssmComm::GetRank();
@@ -2384,7 +2384,7 @@ void FemModel::RequestedDependentsx(void){/*{{{*/
 				}
 				i++;
 			}
-			xDelete<IssmPDouble>(dependents);
+			xDelete<IssmDouble>(dependents);
 		}
 		delete dependent_objects;
 		#else
@@ -2424,7 +2424,7 @@ void FemModel::RequestedOutputsx(Results **presults,char** requested_outputs, in
 			ierr = OutputDefinitionsResponsex(&double_result, this,output_string);
 			if(save_results){
 				if(!ierr){
-					results->AddResult(new GenericExternalResult<IssmPDouble>(results->Size()+1,output_string,reCast<IssmPDouble>(double_result),step,time));
+					results->AddResult(new GenericExternalResult<IssmDouble>(results->Size()+1,output_string,reCast<IssmDouble>(double_result),step,time));
 				}
 				continue;
 			}
@@ -2435,7 +2435,7 @@ void FemModel::RequestedOutputsx(Results **presults,char** requested_outputs, in
 				ierr = OutputDefinitionsResponsex(&double_result, this, output_enum);
 				if(save_results){
 					if(!ierr){
-						results->AddResult(new GenericExternalResult<IssmPDouble>(results->Size()+1,output_string,reCast<IssmPDouble>(double_result),step,time));
+						results->AddResult(new GenericExternalResult<IssmDouble>(results->Size()+1,output_string,reCast<IssmDouble>(double_result),step,time));
 					}
 					continue;
 				}
@@ -2514,8 +2514,8 @@ void FemModel::RequestedOutputsx(Results **presults,char** requested_outputs, in
 							ISSM_MPI_Reduce(&numchannels_local,&numchannels,1,ISSM_MPI_INT,ISSM_MPI_SUM,0,IssmComm::GetComm() );
 							ISSM_MPI_Bcast(&numchannels,1,ISSM_MPI_INT,0,IssmComm::GetComm());
 
-							IssmPDouble* values    = xNewZeroInit<IssmPDouble>(numchannels);
-							IssmPDouble* allvalues = xNew<IssmPDouble>(numchannels);
+							IssmDouble* values    = xNewZeroInit<IssmDouble>(numchannels);
+							IssmDouble* allvalues = xNew<IssmDouble>(numchannels);
 
 							/*Fill-in vector*/
 							for(Object* & object : this->loads->objects){
@@ -2535,10 +2535,10 @@ void FemModel::RequestedOutputsx(Results **presults,char** requested_outputs, in
 
 							/*Gather from all cpus*/
 							ISSM_MPI_Allreduce((void*)values,(void*)allvalues,numchannels,ISSM_MPI_PDOUBLE,ISSM_MPI_SUM,IssmComm::GetComm());
-							xDelete<IssmPDouble>(values);
+							xDelete<IssmDouble>(values);
 
-							if(save_results)results->AddResult(new GenericExternalResult<IssmPDouble*>(results->Size()+1,output_enum,allvalues,numchannels,1,step,time));
-							xDelete<IssmPDouble>(allvalues);
+							if(save_results)results->AddResult(new GenericExternalResult<IssmDouble*>(results->Size()+1,output_enum,allvalues,numchannels,1,step,time));
+							xDelete<IssmDouble>(allvalues);
 
 							isvec = true;
 					}
@@ -2664,7 +2664,7 @@ void FemModel::RequestedOutputsx(Results **presults,char** requested_outputs, in
 
 		/*Add result to Results*/
 		if(!isvec && save_results){
-			results->AddResult(new GenericExternalResult<IssmPDouble>(results->Size()+1,output_string,reCast<IssmPDouble>(double_result),step,time));
+			results->AddResult(new GenericExternalResult<IssmDouble>(results->Size()+1,output_string,reCast<IssmDouble>(double_result),step,time));
 		}
 	}
 

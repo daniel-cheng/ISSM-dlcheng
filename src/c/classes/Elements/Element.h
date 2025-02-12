@@ -333,6 +333,8 @@ class Element: public Object{
 		virtual IssmDouble MassFlux(IssmDouble x1,IssmDouble y1, IssmDouble x2, IssmDouble y2,int segment_id)=0;
 		virtual IssmDouble MinEdgeLength(IssmDouble* xyz_list)=0;
 		virtual IssmDouble Misfit(int modelenum,int observationenum,int weightsenum)=0;
+		virtual void       MisfitAccumulate(int modelenum,IssmDouble dt)=0;
+		virtual IssmDouble MisfitAnnual(int modelenum,int observationenum,int weightsenum,IssmDouble annual_dt)=0;
 		virtual IssmDouble MisfitArea(int weightsenum)=0;
 		virtual void	   MovingFrontalVelocity(void){_error_("not implemented yet");};
 		virtual Gauss*     NewGauss(void)=0;
