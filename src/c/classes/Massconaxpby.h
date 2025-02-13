@@ -21,7 +21,12 @@
 #include "./Elements/Elements.h"
 #include "./FemModel.h"
 #include "../classes/Params/Parameters.h"
-IssmDouble OutputDefinitionsResponsex(FemModel* femmodel,const char* output_string);
+#include "../modules/ModelProcessorx/ModelProcessorx.h"
+//Must update if OutputDefinitionsResponsex changes signature. This is done because of circular dependency
+//(and the fact that Massconaxpby::Response is defined in this header file and not in a cpp file)
+//#include "../modules/OutputDefinitionsResponsex/OutputDefinitionsResponsex.h"
+int OutputDefinitionsResponsex(IssmDouble* presponse, FemModel* femmodel,const char* output_string);
+int OutputDefinitionsResponsex(IssmDouble* presponse, FemModel* femmodel,int output_enum);
 /*}}}*/
 class Massconaxpby: public Object, public Definition{
 
@@ -117,6 +122,7 @@ class Massconaxpby: public Object, public Definition{
 
 			IssmDouble time,starttime,finaltime,dt,yts;
 			int step;
+			int ierr;
 			femmodel->parameters->FindParam(&starttime,TimesteppingStartTimeEnum);
 			femmodel->parameters->FindParam(&finaltime,TimesteppingFinalTimeEnum);
 			femmodel->parameters->FindParam(&time,TimeEnum);
@@ -136,16 +142,18 @@ class Massconaxpby: public Object, public Definition{
 				gxresult= xDynamicCast<GenericExternalResult<IssmDouble>*>(xresult);
 				xresponse = xresult->GetValue();
 			}
-			 else {
-				xresponse=OutputDefinitionsResponsex(femmodel,this->namex);
+			else {
+				ierr = OutputDefinitionsResponsex(&xresponse, femmodel, this->name);
+				if(ierr) _error_("Could not find response "<<this->name);
 				femmodel->results->AddResult(new GenericExternalResult<IssmDouble>(femmodel->results->Size()+1,this->namex,xresponse,step,time));
 			}
 			if (yresult) {
 				gyresult = xDynamicCast<GenericExternalResult<IssmDouble>*>(yresult);
 				yresponse = yresult->GetValue();
 			}
-			 else {
-				yresponse=OutputDefinitionsResponsex(femmodel,this->namey);
+			else {
+				ierr = OutputDefinitionsResponsex(&yresponse, femmodel, this->name);
+				if(ierr) _error_("Could not find response "<<this->name);
 				femmodel->results->AddResult(new GenericExternalResult<IssmDouble>(femmodel->results->Size()+1,this->namey,yresponse,step,time));
 			}
 

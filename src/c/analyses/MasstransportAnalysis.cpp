@@ -117,8 +117,8 @@ void MasstransportAnalysis::UpdateElements(Elements* elements,Inputs* inputs,IoM
 	bool   dakota_analysis;
 	bool   isgroundingline;
 	bool   ismovingfront;
-	bool   isoceancoupling;
 	bool   issmb;
+	int    isoceancoupling;
 	int    grdmodel;
 
 	/*Fetch data needed: */
@@ -155,8 +155,8 @@ void MasstransportAnalysis::UpdateElements(Elements* elements,Inputs* inputs,IoM
 	iomodel->FetchDataToInput(inputs,elements,"md.basalforcings.groundedice_melting_rate",BasalforcingsGroundediceMeltingRateEnum);
 	iomodel->FetchDataToInput(inputs,elements,"md.initialization.vx",VxEnum);
 	iomodel->FetchDataToInput(inputs,elements,"md.initialization.vy",VyEnum);
-	//if(isgroundingline) 	iomodel->FetchDataToInput(inputs,elements,"md.geometry.bed",BedEnum);
-	iomodel->FetchDataToInput(inputs,elements,"md.geometry.bed",BedEnum);
+
+	if(isgroundingline) 	iomodel->FetchDataToInput(inputs,elements,"md.geometry.bed",BedEnum);
 	/*Initialize ThicknessResidual input*/
 	InputUpdateFromConstantx(inputs,elements,0.,ThicknessResidualEnum);
 
@@ -170,6 +170,7 @@ void MasstransportAnalysis::UpdateElements(Elements* elements,Inputs* inputs,IoM
 	switch(basalforcing_model){
 		case FloatingMeltRateEnum:
 			iomodel->FetchDataToInput(inputs,elements,"md.basalforcings.floatingice_melting_rate",BasalforcingsFloatingiceMeltingRateEnum);
+			iomodel->FetchDataToInput(inputs,elements,"md.basalforcings.perturbation_melting_rate",BasalforcingsPerturbationMeltingRateEnum,0.);
 			if(isstochastic){
             iomodel->FetchDataToInput(inputs,elements,"md.stochasticforcing.default_id",StochasticForcingDefaultIdEnum);
             iomodel->FetchDataToInput(inputs,elements,"md.basalforcings.floatingice_melting_rate",BaselineBasalforcingsFloatingiceMeltingRateEnum);
@@ -201,20 +202,24 @@ void MasstransportAnalysis::UpdateElements(Elements* elements,Inputs* inputs,IoM
 		case BasalforcingsIsmip6Enum:{
 			iomodel->FetchDataToInput(inputs,elements,"md.basalforcings.basin_id",BasalforcingsIsmip6BasinIdEnum);
 			iomodel->FetchDataToInput(inputs,elements,"md.basalforcings.melt_anomaly",BasalforcingsIsmip6MeltAnomalyEnum,0.);
-			IssmDouble** array3d = NULL; int* Ms = NULL; int* Ns = NULL; int K;
-			iomodel->FetchData(&array3d,&Ms,&Ns,&K,"md.basalforcings.tf");
-			if(!array3d) _error_("md.basalforcings.tf not found in binary file");
-			for(Object* & object : elements->objects){
-				Element*       element = xDynamicCast<Element*>(object);
-				if(iomodel->domaintype!=Domain2DhorizontalEnum && !element->IsOnBase()) continue;
-				for(int kk=0;kk<K;kk++){
-					element->DatasetInputAdd(BasalforcingsIsmip6TfEnum,array3d[kk],inputs,iomodel,Ms[kk],Ns[kk],1,BasalforcingsIsmip6TfEnum,7,kk);
+
+			/*Deal with tf...*/
+			IssmDouble* array2d = NULL; int M,N,K; IssmDouble* temp = NULL;
+			iomodel->FetchData(&temp,&M,&K,"md.basalforcings.tf_depths"); xDelete<IssmDouble>(temp);
+			_assert_(M==1); _assert_(K>=1);
+			for(int kk=0;kk<K;kk++){
+
+				/*Fetch TF for this depth*/
+				iomodel->FetchData(&array2d, &M, &N, kk, "md.basalforcings.tf");
+				if(!array2d) _error_("md.basalforcings.tf not found in binary file");
+				for(Object* & object : elements->objects){
+					Element*  element = xDynamicCast<Element*>(object);
+					if(iomodel->domaintype!=Domain2DhorizontalEnum && !element->IsOnBase()) continue;
+					element->DatasetInputAdd(BasalforcingsIsmip6TfEnum,array2d,inputs,iomodel,M,N,1,BasalforcingsIsmip6TfEnum,kk);
 				}
+			xDelete<IssmDouble>(array2d);
 			}
-			xDelete<int>(Ms); xDelete<int>(Ns);
-			for(int i=0;i<K;i++) xDelete<IssmDouble>(array3d[i]);
-			xDelete<IssmDouble*>(array3d);
-			}
+											  }
 			break;
 		case BeckmannGoosseFloatingMeltRateEnum:
 			bool isthermalforcing;
@@ -271,6 +276,7 @@ void MasstransportAnalysis::UpdateParameters(Parameters* parameters,IoModel* iom
 	parameters->AddObject(iomodel->CopyConstantObject("md.masstransport.stabilization",MasstransportStabilizationEnum));
 	parameters->AddObject(iomodel->CopyConstantObject("md.masstransport.min_thickness",MasstransportMinThicknessEnum));
 	parameters->AddObject(iomodel->CopyConstantObject("md.masstransport.penalty_factor",MasstransportPenaltyFactorEnum));
+	parameters->AddObject(iomodel->CopyConstantObject("md.groundingline.intrusion_distance",GroundinglineIntrusionDistanceEnum));
 
 	iomodel->FindConstant(&requestedoutputs,&numoutputs,"md.masstransport.requested_outputs");
 	parameters->AddObject(new IntParam(MasstransportNumRequestedOutputsEnum,numoutputs));
@@ -327,7 +333,7 @@ ElementMatrix* MasstransportAnalysis::CreateKMatrixCG(Element* element){/*{{{*/
 	/*Intermediaries */
 	int        stabilization;
 	int        domaintype,dim;
-	IssmDouble Jdet,D_scalar,dt,h;
+	IssmDouble Jdet,D_scalar,dt,h,factor;
 	IssmDouble vel,vx,vy,dvxdx,dvydy;
 	IssmDouble xi,tau;
 	IssmDouble dvx[2],dvy[2];
@@ -473,49 +479,56 @@ ElementMatrix* MasstransportAnalysis::CreateKMatrixCG(Element* element){/*{{{*/
 		if(stabilization==2){
 			/*Streamline upwind*/
 			_assert_(dim==2);
+			factor = dt*gauss->weight*Jdet*tau;
 			for(int i=0;i<numnodes;i++){
 				for(int j=0;j<numnodes;j++){
-					Ke->values[i*numnodes+j]+=dt*gauss->weight*Jdet*tau*(vx*dbasis[0*numnodes+i]+vy*dbasis[1*numnodes+i])*(vx*dbasis[0*numnodes+j]+vy*dbasis[1*numnodes+j]);
+					Ke->values[i*numnodes+j]+=factor*(vx*dbasis[0*numnodes+i]+vy*dbasis[1*numnodes+i])*(vx*dbasis[0*numnodes+j]+vy*dbasis[1*numnodes+j]);
 				}
 			}
 		}
 		if(stabilization==5){/*{{{*/
 			 /*Mass matrix - part 2*/
+			factor = gauss->weight*Jdet*tau;
 			for(int i=0;i<numnodes;i++){
 				for(int j=0;j<numnodes;j++){
-					Ke->values[i*numnodes+j]+=gauss->weight*Jdet*tau*basis[j]*(vx*dbasis[0*numnodes+i]+vy*dbasis[1*numnodes+i]);
+					Ke->values[i*numnodes+j]+=factor*basis[j]*(vx*dbasis[0*numnodes+i]+vy*dbasis[1*numnodes+i]);
 				}
 			}
 			/*Mass matrix - part 3*/
+			factor = gauss->weight*Jdet*tau;
 			for(int i=0;i<numnodes;i++){
 				for(int j=0;j<numnodes;j++){
-					Ke->values[i*numnodes+j]+=gauss->weight*Jdet*tau*basis[j]*(basis[i]*dvxdx+basis[i]*dvydy);
+					Ke->values[i*numnodes+j]+=factor*basis[j]*(basis[i]*dvxdx+basis[i]*dvydy);
 				}
 			}
 
 			/*Advection matrix - part 2, A*/
+			factor = dt*gauss->weight*Jdet*tau;
 			for(int i=0;i<numnodes;i++){
             for(int j=0;j<numnodes;j++){
-               Ke->values[i*numnodes+j]+=dt*gauss->weight*Jdet*tau*(vx*dbasis[0*numnodes+j]+vy*dbasis[1*numnodes+j])*(vx*dbasis[0*numnodes+i]+vy*dbasis[1*numnodes+i]);
+               Ke->values[i*numnodes+j]+=factor*(vx*dbasis[0*numnodes+j]+vy*dbasis[1*numnodes+j])*(vx*dbasis[0*numnodes+i]+vy*dbasis[1*numnodes+i]);
             }
          }
 			/*Advection matrix - part 3, A*/
+			factor = dt*gauss->weight*Jdet*tau;
 			for(int i=0;i<numnodes;i++){
             for(int j=0;j<numnodes;j++){
-					Ke->values[i*numnodes+j]+=dt*gauss->weight*Jdet*tau*(vx*dbasis[0*numnodes+j]+vy*dbasis[1*numnodes+j])*(basis[i]*dvxdx+basis[i]*dvydy);
+					Ke->values[i*numnodes+j]+=factor*(vx*dbasis[0*numnodes+j]+vy*dbasis[1*numnodes+j])*(basis[i]*dvxdx+basis[i]*dvydy);
 				}
          }
 
 			/*Advection matrix - part 2, B*/
+			factor = dt*gauss->weight*Jdet*tau;
 			for(int i=0;i<numnodes;i++){
             for(int j=0;j<numnodes;j++){
-					Ke->values[i*numnodes+j]+=dt*gauss->weight*Jdet*tau*(basis[j]*dvxdx+basis[j]*dvydy)*(vx*dbasis[0*numnodes+i]+vy*dbasis[1*numnodes+i]);
+					Ke->values[i*numnodes+j]+=factor*(basis[j]*dvxdx+basis[j]*dvydy)*(vx*dbasis[0*numnodes+i]+vy*dbasis[1*numnodes+i]);
 				}
          }
 			/*Advection matrix - part 3, B*/
+			factor = dt*gauss->weight*Jdet*tau;
 			for(int i=0;i<numnodes;i++){
             for(int j=0;j<numnodes;j++){
-					Ke->values[i*numnodes+j]+=dt*gauss->weight*Jdet*tau*(basis[j]*dvxdx+basis[j]*dvydy)*(basis[i]*dvxdx+basis[i]*dvydy);
+					Ke->values[i*numnodes+j]+=factor*(basis[j]*dvxdx+basis[j]*dvydy)*(basis[i]*dvxdx+basis[i]*dvydy);
 				}
 			}
 		}/*}}}*/
@@ -621,8 +634,8 @@ ElementVector* MasstransportAnalysis::CreatePVectorCG(Element* element){/*{{{*/
 	int         melt_style,point1;
 	bool        mainlyfloating;
 	IssmDouble  fraction1,fraction2;
-	IssmDouble  Jdet,dt;
-	IssmDouble  ms,mb,gmb,fmb,thickness;
+	IssmDouble  Jdet,dt,intrusiondist;
+	IssmDouble  ms,mb,gmb,fmb,thickness,fmb_pert,gldistance;
 	IssmDouble  vx,vy,vel,dvxdx,dvydy,xi,h,tau;
 	IssmDouble  dvx[2],dvy[2];
 	IssmDouble  gllevelset,phi=1.;
@@ -651,26 +664,28 @@ ElementVector* MasstransportAnalysis::CreatePVectorCG(Element* element){/*{{{*/
 	element->FindParam(&melt_style,GroundinglineMeltInterpolationEnum);
 	element->FindParam(&dt,TimesteppingTimeStepEnum);
 	element->FindParam(&stabilization,MasstransportStabilizationEnum);
+	element->FindParam(&intrusiondist,GroundinglineIntrusionDistanceEnum);
+
 	Input* gmb_input        = element->GetInput(BasalforcingsGroundediceMeltingRateEnum);  _assert_(gmb_input);
 	Input* fmb_input        = element->GetInput(BasalforcingsFloatingiceMeltingRateEnum);  _assert_(fmb_input);
+	//Input* fmb_pert_input   = element->GetInput(BasalforcingsPerturbationMeltingRateEnum); _assert_(fmb_pert_input);
 	Input* gllevelset_input = element->GetInput(MaskOceanLevelsetEnum);              _assert_(gllevelset_input);
 	Input* ms_input         = element->GetInput(SmbMassBalanceEnum);                       _assert_(ms_input);
 	Input* thickness_input  = element->GetInput(ThicknessEnum);                            _assert_(thickness_input);
 	Input* vxaverage_input  = element->GetInput(VxAverageEnum);										_assert_(vxaverage_input);
 	Input* vyaverage_input  = element->GetInput(VyAverageEnum);										_assert_(vyaverage_input);
-
-//	if(element->Id()==9){
-//		gmb_input->Echo();
-//		_error_("S");
-//	}
-
+	//Input* gldistance_input = element->GetInput(DistanceToGroundinglineEnum);              _assert_(gldistance_input); 
 	h=element->CharacteristicLength();
 
 	/*Recover portion of element that is grounded*/
 	phi=element->GetGroundedPortion(xyz_list);
 	if(melt_style==SubelementMelt2Enum){
-		element->GetGroundedPart(&point1,&fraction1,&fraction2,&mainlyfloating);
-	   gauss = element->NewGauss(point1,fraction1,fraction2,3);
+		element->GetGroundedPart(&point1,&fraction1,&fraction2,&mainlyfloating,MaskOceanLevelsetEnum,0);
+	    gauss = element->NewGauss(point1,fraction1,fraction2,3);
+	}
+	else if(melt_style==IntrusionMeltEnum){
+		element->GetGroundedPart(&point1,&fraction1,&fraction2,&mainlyfloating,DistanceToGroundinglineEnum,intrusiondist);
+       	gauss = element->NewGauss(point1,fraction1,fraction2,3);
 	}
 	else{
 		gauss = element->NewGauss(3);
@@ -685,6 +700,7 @@ ElementVector* MasstransportAnalysis::CreatePVectorCG(Element* element){/*{{{*/
 		ms_input->GetInputValue(&ms,gauss);
 		gmb_input->GetInputValue(&gmb,gauss);
 		fmb_input->GetInputValue(&fmb,gauss);
+		//fmb_pert_input->GetInputValue(&fmb_pert,gauss);
 		gllevelset_input->GetInputValue(&gllevelset,gauss);
 		thickness_input->GetInputValue(&thickness,gauss);
 
@@ -697,16 +713,38 @@ ElementVector* MasstransportAnalysis::CreatePVectorCG(Element* element){/*{{{*/
 			else mb=fmb;
 		}
 		else if(melt_style==NoMeltOnPartiallyFloatingEnum){
-			if (phi<0.00000001) mb=fmb;
+			if (phi<0.00000001){
+				mb=fmb;//+fmb_pert;
+			}
 			else mb=gmb;
 		}
 		else if(melt_style==FullMeltOnPartiallyFloatingEnum){
 			if (phi<0.99999999) mb=fmb;
 			else mb=gmb;
 		}
-		else  _error_("melt interpolation "<<EnumToStringx(melt_style)<<" not implemented yet");
+		else if(melt_style==IntrusionMeltEnum){
+			Input* gldistance_input = element->GetInput(DistanceToGroundinglineEnum); _assert_(gldistance_input); 
+			gldistance_input->GetInputValue(&gldistance,gauss);
+			if(intrusiondist==0){
+				if(gllevelset>0.) mb=gmb;
+				else mb=fmb;
+			}
+			else if(gldistance>intrusiondist) {
+				mb=gmb;
+			}
+			else if(gldistance<=intrusiondist && gldistance>0) {
+				mb=fmb*(1-gldistance/intrusiondist); 
+			}
+			else{
+				mb=fmb;
+			}
+		}
+		else{
+			_error_("melt interpolation "<<EnumToStringx(melt_style)<<" not implemented yet");
+		}
 
-		for(int i=0;i<numnodes;i++) pe->values[i]+=Jdet*gauss->weight*(thickness+dt*(ms-mb))*basis[i];
+		IssmDouble factor = Jdet*gauss->weight*(thickness+dt*(ms-mb));
+		for(int i=0;i<numnodes;i++) pe->values[i]+=factor*basis[i];
 
 		if(stabilization==5){ //SUPG
 			element->NodalFunctionsDerivatives(dbasis,xyz_list,gauss);
@@ -723,12 +761,13 @@ ElementVector* MasstransportAnalysis::CreatePVectorCG(Element* element){/*{{{*/
 			//tau=dt/6; // as implemented in Ua
 
 			/*Force vector - part 2*/
+			factor = Jdet*gauss->weight*(thickness+dt*(ms-mb));
 			for(int i=0;i<numnodes;i++){
-				pe->values[i]+=Jdet*gauss->weight*(thickness+dt*(ms-mb))*(tau*vx*dbasis[0*numnodes+i]+tau*vy*dbasis[1*numnodes+i]);
+				pe->values[i]+=factor*(tau*vx*dbasis[0*numnodes+i]+tau*vy*dbasis[1*numnodes+i]);
 			}
 			/*Force vector - part 3*/
 			for(int i=0;i<numnodes;i++){
-				pe->values[i]+=Jdet*gauss->weight*(thickness+dt*(ms-mb))*(tau*basis[i]*dvxdx+tau*basis[i]*dvydy);
+				pe->values[i]+=factor*(tau*basis[i]*dvxdx+tau*basis[i]*dvydy);
 			}
 		}
 
@@ -750,8 +789,8 @@ ElementVector* MasstransportAnalysis::CreatePVectorDG(Element* element){/*{{{*/
 	int melt_style, point1;
 	bool mainlyfloating;
 	IssmDouble  fraction1,fraction2,gllevelset;
-	IssmDouble  Jdet,dt;
-	IssmDouble  ms,mb,gmb,fmb,thickness,phi=1.;
+	IssmDouble  Jdet,dt,intrusiondist;
+	IssmDouble  ms,mb,gmb,fmb,thickness,phi=1.,gldistance;
 	IssmDouble* xyz_list = NULL;
 
 	/*Fetch number of nodes and dof for this finite element*/
@@ -765,6 +804,8 @@ ElementVector* MasstransportAnalysis::CreatePVectorDG(Element* element){/*{{{*/
 	element->GetVerticesCoordinates(&xyz_list);
 	element->FindParam(&dt,TimesteppingTimeStepEnum);
 	element->FindParam(&melt_style,GroundinglineMeltInterpolationEnum);
+	element->FindParam(&intrusiondist,GroundinglineIntrusionDistanceEnum);
+
 	Input* gmb_input        = element->GetInput(BasalforcingsGroundediceMeltingRateEnum); _assert_(gmb_input);
 	Input* fmb_input        = element->GetInput(BasalforcingsFloatingiceMeltingRateEnum); _assert_(fmb_input);
 	Input* ms_input         = element->GetInput(SmbMassBalanceEnum);                      _assert_(ms_input);
@@ -775,9 +816,13 @@ ElementVector* MasstransportAnalysis::CreatePVectorDG(Element* element){/*{{{*/
    Gauss* gauss=NULL;
    phi=element->GetGroundedPortion(xyz_list);
    if(melt_style==SubelementMelt2Enum){
-      element->GetGroundedPart(&point1,&fraction1,&fraction2,&mainlyfloating);
+      element->GetGroundedPart(&point1,&fraction1,&fraction2,&mainlyfloating,MaskOceanLevelsetEnum,0);
       gauss = element->NewGauss(point1,fraction1,fraction2,3);
    }
+   else if(melt_style==IntrusionMeltEnum){
+	    element->GetGroundedPart(&point1,&fraction1,&fraction2,&mainlyfloating,DistanceToGroundinglineEnum,intrusiondist);
+       gauss = element->NewGauss(point1,fraction1,fraction2,3);
+	}
    else{
       gauss = element->NewGauss(3);
    }
@@ -798,21 +843,35 @@ ElementVector* MasstransportAnalysis::CreatePVectorDG(Element* element){/*{{{*/
          if (phi>0.999999999) mb=gmb;
          else mb=(1-phi)*fmb+phi*gmb; // phi is the fraction of grounded ice so (1-phi) is floating
       }
-      else if(melt_style==SubelementMelt2Enum){
+      	else if(melt_style==SubelementMelt2Enum){
          if(gllevelset>0.) mb=gmb;
          else mb=fmb;
       }
-      else if(melt_style==NoMeltOnPartiallyFloatingEnum){
+      	else if(melt_style==NoMeltOnPartiallyFloatingEnum){
          if (phi<0.00000001) mb=fmb;
          else mb=gmb;
       }
-      else if(melt_style==FullMeltOnPartiallyFloatingEnum){
+      	else if(melt_style==FullMeltOnPartiallyFloatingEnum){
          if (phi<0.99999999) mb=fmb;
          else mb=gmb;
-      }
-      else  _error_("melt interpolation "<<EnumToStringx(melt_style)<<" not implemented yet");
+      	}
+	  	else if(melt_style==IntrusionMeltEnum){
+			Input* gldistance_input = element->GetInput(DistanceToGroundinglineEnum);              _assert_(gldistance_input); 
+        	gldistance_input->GetInputValue(&gldistance,gauss);
+			if (intrusiondist==0)
+				if(gllevelset>0.) mb=gmb;
+				else mb=fmb;
+	        else if(gldistance>intrusiondist) 
+				mb=gmb;
+			else if(gldistance<=intrusiondist && gldistance>0) 
+				mb=fmb*(1-gldistance/intrusiondist); 
+			else
+				mb=fmb;
+    	}
+      	else  _error_("melt interpolation "<<EnumToStringx(melt_style)<<" not implemented yet");
 
-		for(int i=0;i<numnodes;i++) pe->values[i]+=Jdet*gauss->weight*(thickness+dt*(ms-mb))*basis[i];
+		IssmDouble factor = Jdet*gauss->weight*(thickness+dt*(ms-mb));
+		for(int i=0;i<numnodes;i++) pe->values[i]+=factor*basis[i];
 	}
 
 	/*Clean up and return*/
@@ -901,8 +960,7 @@ void           MasstransportAnalysis::InputUpdateFromSolution(IssmDouble* soluti
 	/*Do we do grounding line migration?*/
 	bool isgroundingline;
 	element->FindParam(&isgroundingline,TransientIsgroundinglineEnum);
-	//if(isgroundingline) basalelement->GetInputListOnVertices(&bed[0],BedEnum);
-	basalelement->GetInputListOnVertices(&bed[0],BedEnum);
+	if(isgroundingline) basalelement->GetInputListOnVertices(&bed[0],BedEnum);
 
 	/*Find MasstransportHydrostaticAdjustment to figure out how to update the geometry:*/
 	int hydroadjustment;
@@ -1100,7 +1158,7 @@ ElementVector* MasstransportAnalysis::CreateFctPVector(Element* element){/*{{{*/
 	/*Recover portion of element that is grounded*/
 	phi=element->GetGroundedPortion(xyz_list);
 	if(melt_style==SubelementMelt2Enum){
-		element->GetGroundedPart(&point1,&fraction1,&fraction2,&mainlyfloating);
+		element->GetGroundedPart(&point1,&fraction1,&fraction2,&mainlyfloating,MaskOceanLevelsetEnum,0);
 	   gauss = element->NewGauss(point1,fraction1,fraction2,3);
 	}
 	else{
@@ -1136,7 +1194,8 @@ ElementVector* MasstransportAnalysis::CreateFctPVector(Element* element){/*{{{*/
 		}
 		else  _error_("melt interpolation "<<EnumToStringx(melt_style)<<" not implemented yet");
 
-		for(int i=0;i<numnodes;i++) pe->values[i]+=Jdet*gauss->weight*(ms-mb)*basis[i];
+		IssmDouble factor = Jdet*gauss->weight*(ms-mb);
+		for(int i=0;i<numnodes;i++) pe->values[i]+=factor*basis[i];
 
 	}
 
@@ -1148,6 +1207,10 @@ ElementVector* MasstransportAnalysis::CreateFctPVector(Element* element){/*{{{*/
 	return pe;
 }/*}}}*/
 void           MasstransportAnalysis::FctKMatrix(Matrix<IssmDouble>** pKff,Matrix<IssmDouble>** pKfs,FemModel* femmodel){/*{{{*/
+
+	int domaintype;
+	femmodel->parameters->FindParam(&domaintype,DomainTypeEnum);
+	if(domaintype!=Domain2DhorizontalEnum) _error_("domain type "<<EnumToStringx(domaintype)<<" not supported yet");
 
 	/*Output*/
 	Matrix<IssmDouble>* Kff = NULL;

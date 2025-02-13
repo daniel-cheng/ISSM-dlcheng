@@ -54,6 +54,7 @@ class Tria: public Element,public ElementHook,public TriaRef{
 		/*Element virtual functions definitions: {{{*/
 		void        AverageOntoPartition(Vector<IssmDouble>* partition_contributions,Vector<IssmDouble>* partition_areas,IssmDouble* vertex_response,IssmDouble* qmu_part);
 		void			CalvingRateVonmises();
+		void			CalvingRateVonmisesAD();
 		void			CalvingRateTest();
 		void        CalvingCrevasseDepth();
 		void			CalvingRateLevermann();
@@ -61,6 +62,7 @@ class Tria: public Element,public ElementHook,public TriaRef{
 		void			CalvingFluxLevelset();
 		void			CalvingMeltingFluxLevelset();
 		void			CalvingRateParameterization();
+		void			CalvingRateCalvingMIP();
 		IssmDouble  CharacteristicLength(void);
 		void        ComputeBasalStress(void);
 		void        ComputeDeviatoricStressTensor();
@@ -86,7 +88,7 @@ class Tria: public Element,public ElementHook,public TriaRef{
 		void        FSContactMigration(Vector<IssmDouble>* vertex_sigmann,Vector<IssmDouble>* vertex_waterpressure);
 		Element*    GetBasalElement(void){_error_("not implemented yet");};
 		void        GetLevelsetPositivePart(int* point1,IssmDouble* fraction1,IssmDouble* fraction2, bool* mainlynegative,IssmDouble* levelsetvalues);
-		void        GetGroundedPart(int* point1,IssmDouble* fraction1, IssmDouble* fraction2,bool* mainlyfloating);
+		void        GetGroundedPart(int* point1,IssmDouble* fraction1, IssmDouble* fraction2,bool* mainlyfloating, int distance_enum, IssmDouble intrusion_distance);
 		IssmDouble  GetGroundedPortion(IssmDouble* xyz_list);
 		void        GetFractionGeometry(IssmDouble* weights, IssmDouble* pphi, int* ppoint1,IssmDouble* pfraction1,IssmDouble* pfraction2, bool* ptrapezeisnegative, IssmDouble* gl);
 		void        GetNodalWeightsAndAreaAndCentroidsFromLeveset(IssmDouble* loadweights, IssmDouble* ploadarea, IssmDouble* platbar, IssmDouble* plongbar, IssmDouble late, IssmDouble longe, IssmDouble area,  int levelsetenum);
@@ -125,8 +127,6 @@ class Tria: public Element,public ElementHook,public TriaRef{
 		IssmDouble  MassFlux(IssmDouble x1,IssmDouble y1, IssmDouble x2, IssmDouble y2,int segment_id);
 		void        MaterialUpdateFromTemperature(void){_error_("not implemented yet");};
 		IssmDouble  Misfit(int modelenum,int observationenum,int weightsenum);
-		void		MisfitAccumulate(int modelenum,IssmDouble dt);
-		IssmDouble  MisfitAnnual(int modelenum,int observationenum,int weightsenum,IssmDouble annual_dt);
 		IssmDouble  MisfitArea(int weightsenum);
 		int         NodalValue(IssmDouble* pvalue, int index, int natureofdataenum);
 		int         NumberofNodesPressure(void);
@@ -157,6 +157,8 @@ class Tria: public Element,public ElementHook,public TriaRef{
 		IssmDouble  TotalFloatingBmb(bool scaled);
 		IssmDouble  TotalGroundedBmb(bool scaled);
 		IssmDouble  TotalSmb(bool scaled);
+		IssmDouble  TotalSmbMelt(bool scaled);
+		IssmDouble  TotalSmbRefreeze(bool scaled);
 		void        Update(Inputs* inputs,int index, IoModel* iomodel,int analysis_counter,int analysis_type,int finitelement);
 		int         UpdatePotentialUngrounding(IssmDouble* vertices_potentially_ungrounding,Vector<IssmDouble>* vec_nodes_on_iceshelf,IssmDouble* nodes_on_iceshelf);
 		void        ValueP1DerivativesOnGauss(IssmDouble* dvalue,IssmDouble* values,IssmDouble* xyz_list,Gauss* gauss);
@@ -168,12 +170,12 @@ class Tria: public Element,public ElementHook,public TriaRef{
 		void			WriteFieldIsovalueSegment(DataSet* segments,int fieldenum,IssmDouble fieldvalue);
 
 		#ifdef _HAVE_ESA_
-		void    EsaGeodetic2D(Vector<IssmDouble>* pUp,Vector<IssmDouble>* pNorth,Vector<IssmDouble>* pEast,  Vector<IssmDouble>* pX,Vector<IssmDouble>* pY,IssmDouble* xx,IssmDouble* yy);
-		void    EsaGeodetic3D(Vector<IssmDouble>* pUp,Vector<IssmDouble>* pNorth,Vector<IssmDouble>* pEast,IssmDouble* latitude,IssmDouble* longitude,IssmDouble* radius,IssmDouble* xx,IssmDouble* yy,IssmDouble* zz);
+		void    EsaGeodetic2D(Vector<IssmDouble>* pUp,Vector<IssmDouble>* pNorth,Vector<IssmDouble>* pEast,Vector<IssmDouble>* pGravity,Vector<IssmDouble>* pX,Vector<IssmDouble>* pY,IssmDouble* xx,IssmDouble* yy);
+      void    EsaGeodetic3D(Vector<IssmDouble>* pUp,Vector<IssmDouble>* pNorth,Vector<IssmDouble>* pEast,Vector<IssmDouble>* pGravity,IssmDouble* latitude,IssmDouble* longitude,IssmDouble* radius,IssmDouble* xx,IssmDouble* yy,IssmDouble* zz);
 		#endif
 		#ifdef _HAVE_SEALEVELCHANGE_
 		void       GiaDeflection(Vector<IssmDouble>* wg,Vector<IssmDouble>* dwgdt,Matlitho* litho, IssmDouble* x,IssmDouble* y);
-		void       SealevelchangeGeometryInitial(IssmDouble* xxe, IssmDouble* yye, IssmDouble* zze, IssmDouble* areae, int* lids);
+		void       SealevelchangeGeometryInitial(IssmDouble* xxe, IssmDouble* yye, IssmDouble* zze, IssmDouble* areae, int* lids, int* vcount);
 		void       SealevelchangeGeometrySubElementKernel(SealevelGeometry* slgeom);
 		void       SealevelchangeGeometrySubElementLoads(SealevelGeometry* slgeom, IssmDouble* areae);
 		void       SealevelchangeGeometryCentroidLoads(SealevelGeometry* slgeom, IssmDouble* xxe, IssmDouble* yye, IssmDouble* zze, IssmDouble* areae);
@@ -246,7 +248,9 @@ class Tria: public Element,public ElementHook,public TriaRef{
 		void           StabilizationParameterAnisotropic(IssmDouble* tau_parameter_ansiotropic, IssmDouble u, IssmDouble v, IssmDouble w, IssmDouble hx, IssmDouble hy, IssmDouble hz, IssmDouble kappa){_error_("not implemented yet");};
 		void           UpdateConstraintsExtrudeFromBase(void);
 		void           UpdateConstraintsExtrudeFromTop(void);
-		void           SealevelchangeGxL(IssmDouble* grdfieldout, int spatial_component, int* AlphaIndex, int** AlphaIndexsub, int* AzimIndex, int**AzimIndexsub, IssmDouble* G, IssmDouble* Grot, GrdLoads* loads, IssmDouble* polarmotionvector, SealevelGeometry* slgeom, int nel, bool percpu, int viscousenum, bool computefuture);
+		IssmDouble*    SealevelchangeGxL(IssmDouble* G, IssmDouble* Grot, GrdLoads* loads, IssmDouble* polarmotionvector, SealevelGeometry* slgeom, int nel, bool computefuture);
+		IssmDouble*    SealevelchangeHorizGxL(int spatial_component, IssmDouble* G, IssmDouble* Grot, GrdLoads* loads, IssmDouble* polarmotionvector, SealevelGeometry* slgeom, int nel, bool computefuture);
+		void	       SealevelchangeCollectGrdfield(IssmDouble* grdfieldout, IssmDouble* grdfield, SealevelGeometry* slgeom, int nel, bool percpu, int viscousenum, bool computefuture);
 		/*}}}*/
 
 };

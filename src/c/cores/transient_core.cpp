@@ -15,10 +15,7 @@
 #include "../shared/shared.h"
 #include "../modules/modules.h"
 #include "../solutionsequences/solutionsequences.h"
-
-#ifdef _HAVE_CODIPACK_
-extern CoDi_global codi_global;
-#endif
+#include "../toolkits/codipack/CoDiPackGlobal.h"
 
 /*Prototypes*/
 void transient_step(FemModel* femmodel);
@@ -78,12 +75,11 @@ void transient_core(FemModel* femmodel){/*{{{*/
 		if(VerboseSolution()){
 			_printf0_("iteration " << step << "/" << ceil((finaltime-time)/dt)+step << \
 						"  time [yr]: " <<std::fixed<<setprecision(2)<< time/yts << " (time step: " << dt/yts << ")\n");
+			//_printf0_("\e[92miteration " << step << "/" << ceil((finaltime-time)/dt)+step << \
+			//			"  time [yr]: " <<std::fixed<<setprecision(2)<< time/yts << "\e[m (time step: " << dt/yts << ")\n");
 		}
 		bool save_results=false;
-		//if(step%output_frequency==0 || (time >= finaltime - (yts*DBL_EPSILON)) || step==1) save_results=true;
-		if (step%output_frequency==0 || (time >= finaltime - (yts*DBL_EPSILON)) || step==1) save_results=true;
-		//_printf0_("transient_core.cpp:84 save_results: " << save_results << " iteration " << step << "/" << ceil((finaltime-time)/dt)+step << \
-					"  time [yr]: " <<std::fixed<<setprecision(2)<< time/yts << " (time step: " << dt/yts << ")\n");
+		if(step%output_frequency==0 || (time >= finaltime - (yts*DBL_EPSILON)) || step==1) save_results=true;
 		femmodel->parameters->SetParam(save_results,SaveResultsEnum);
 
 		/*Run transient step!*/
@@ -103,40 +99,42 @@ void transient_core(FemModel* femmodel){/*{{{*/
 		/*Adaptive mesh refinement*/
 		if(amr_frequency){
 
-			#if !defined(_HAVE_AD_)
+#if !defined(_HAVE_AD_)
 			if(save_results) femmodel->WriteMeshInResults();
 			if(step%amr_frequency==0 && time<finaltime){
 				if(VerboseSolution()) _printf0_("   refining mesh\n");
 				femmodel->ReMesh();//Do not refine the last step
 			}
 
-			#else
+#else
 			_error_("AMR not suppored with AD");
-			#endif
+#endif
 		}
 
 		if(iscontrol && isautodiff){
-			//_printf0_("   transient_core.cpp:119 computing dependents...\n");
 			/*Go through our dependent variables, and compute the response:*/
 			DataSet* dependent_objects=((DataSetParam*)femmodel->parameters->FindParamObject(AutodiffDependentObjectsEnum))->value;
 			for(Object* & object:dependent_objects->objects){
 				DependentObject* dep=(DependentObject*)object;
-				IssmDouble  output_value;
-				dep->Responsex(&output_value,femmodel);
-				dep->AddValue(output_value);
+				dep->RecordResponsex(femmodel);
 			}
 		}
 	}
 
-	int my_rank = IssmComm::GetRank();
-	if((!iscontrol || !isautodiff) && my_rank == 0) femmodel->RequestedDependentsx();
+	if(!iscontrol || !isautodiff) femmodel->RequestedDependentsx();
+
+	/*finalize:*/
+	transient_postcore(femmodel);
+
+
 }/*}}}*/
 void transient_step(FemModel* femmodel){/*{{{*/
 
 	/*parameters: */
-	bool isstressbalance,ismasstransport,isage,isoceantransport,issmb,isthermal,isgroundingline,isesa,issampling;
-	bool isslc,ismovingfront,isdamageevolution,ishydrology,isoceancoupling,isstochasticforcing,save_results;
-	int  step,sb_coupling_frequency;
+	bool isstressbalance,ismasstransport,ismmemasstransport,isage,isoceantransport,issmb,isthermal,isgroundingline,isesa,issampling;
+	bool isslc,ismovingfront,isdamageevolution,ishydrology,isstochasticforcing,save_results;
+	bool isdebris;
+	int  step,sb_coupling_frequency,isoceancoupling;
 	int  domaintype,numoutputs;
 
 	/*then recover parameters common to all solutions*/
@@ -146,6 +144,7 @@ void transient_step(FemModel* femmodel){/*{{{*/
 	femmodel->parameters->FindParam(&sb_coupling_frequency,SettingsSbCouplingFrequencyEnum);
 	femmodel->parameters->FindParam(&isstressbalance,TransientIsstressbalanceEnum);
 	femmodel->parameters->FindParam(&ismasstransport,TransientIsmasstransportEnum);
+	femmodel->parameters->FindParam(&ismmemasstransport,TransientIsmmemasstransportEnum);
 	femmodel->parameters->FindParam(&isage,TransientIsageEnum);
 	femmodel->parameters->FindParam(&isoceantransport,TransientIsoceantransportEnum);
 	femmodel->parameters->FindParam(&issmb,TransientIssmbEnum);
@@ -157,17 +156,12 @@ void transient_step(FemModel* femmodel){/*{{{*/
 	femmodel->parameters->FindParam(&isoceancoupling,TransientIsoceancouplingEnum);
 	femmodel->parameters->FindParam(&isdamageevolution,TransientIsdamageevolutionEnum);
 	femmodel->parameters->FindParam(&ishydrology,TransientIshydrologyEnum);
+	femmodel->parameters->FindParam(&isdebris,TransientIsdebrisEnum);
 	femmodel->parameters->FindParam(&issampling,TransientIssamplingEnum);
 	femmodel->parameters->FindParam(&numoutputs,TransientNumRequestedOutputsEnum);
 	femmodel->parameters->FindParam(&isstochasticforcing,StochasticForcingIsStochasticForcingEnum);
 
-	#if defined(_HAVE_OCEAN_ )
-	if(isoceancoupling) OceanExchangeDatax(femmodel,false);
-	#endif
-
-	if(isstochasticforcing){
-		StochasticForcingx(femmodel);
-	}
+	if(isstochasticforcing) StochasticForcingx(femmodel);
 
 	if(isthermal && domaintype==Domain3DEnum){
 		if(issmb){
@@ -192,59 +186,62 @@ void transient_step(FemModel* femmodel){/*{{{*/
 	}
 
 	/* Using Hydrology dc  coupled we need to compute smb in the hydrology inner time loop*/
-	if(issmb) {
-		smb_core(femmodel);
-	}
+	if(issmb) smb_core(femmodel);
 
-	if(ishydrology){
-		hydrology_core(femmodel);
-	}
+	if(ishydrology) hydrology_core(femmodel);
 
-	if(isstressbalance && (step%sb_coupling_frequency==0 || step==1) ) {
-		stressbalance_core(femmodel);
-	}
+	if(isstressbalance && (step%sb_coupling_frequency==0 || step==1)) stressbalance_core(femmodel);
 
-	if(isdamageevolution) {
-		damage_core(femmodel);
-	}
+	if(isdamageevolution) damage_core(femmodel);
 
-	if(ismovingfront)	{
-		movingfront_core(femmodel);
+	if(ismovingfront)	movingfront_core(femmodel);
+
+	if(isdebris) debris_core(femmodel);
+
+#if defined(_HAVE_OCEAN_)
+	if(isoceancoupling) {
+		/*First calculate thickness change without melt (dynamic thinning) to send to ocean
+		 * then receive ocean melt 
+		 * then go back to the previous geometry to continue the transient with the melt received*/
+		InputUpdateFromConstantx(femmodel,0.,BasalforcingsFloatingiceMeltingRateEnum,P1Enum);
+		masstransport_core(femmodel);
+		OceanExchangeDatax(femmodel,false);
+		InputDuplicatex(femmodel,ThicknessOldEnum,ThicknessEnum);
+		InputDuplicatex(femmodel,BaseOldEnum,BaseEnum);
+		InputDuplicatex(femmodel,SurfaceOldEnum,SurfaceEnum);
 	}
+#endif
 
 	/* from here on, prepare geometry for next time step*/
 
 	if(ismasstransport){
 		bmb_core(femmodel);
 		masstransport_core(femmodel);
-		femmodel->UpdateVertexPositionsx();
+	}
+	if(ismmemasstransport){
+		mmemasstransport_core(femmodel);
 	}
 
-	if(isoceantransport){
-		oceantransport_core(femmodel);
-	}
+	if(isoceantransport) oceantransport_core(femmodel);
 
-	if(isgroundingline){
-		groundingline_core(femmodel);
-	}
+	if(isgroundingline) groundingline_core(femmodel);
 
-	/*esa: */
+	/*Update mesh vertices now that we have changed the geometry*/
+	if(ismasstransport || isgroundingline) femmodel->UpdateVertexPositionsx();
+
 	if(isesa) esa_core(femmodel);
 
 	/*Sea level change: */
 	if(isslc){
-		#ifdef _HAVE_SEALEVELCHANGE_
+#ifdef _HAVE_SEALEVELCHANGE_
 		sealevelchange_core(femmodel);
-		#else
+#else
 		_error_("Compiled with SeaLevelChange capability");
-		#endif
+#endif
 	}
 
 	/*Sampling: */
-	if(issampling){
-		if(VerboseSolution()) _printf0_("   computing Gaussian random field\n");
-		sampling_core(femmodel);
-	}
+	if(issampling) sampling_core(femmodel);
 
 	/*Any requested output that needs to be saved?*/
 	if(numoutputs){
@@ -260,38 +257,54 @@ void transient_step(FemModel* femmodel){/*{{{*/
 }/*}}}*/
 void transient_precore(FemModel* femmodel){/*{{{*/
 
-	bool       isoceancoupling,isslc;
-	int        amr_frequency,amr_restart;
+	bool       isslc,isuq;
+	int        amr_frequency,amr_restart,isoceancoupling;
 
 	femmodel->parameters->FindParam(&isoceancoupling,TransientIsoceancouplingEnum);
 	femmodel->parameters->FindParam(&amr_frequency,TransientAmrFrequencyEnum);
 	femmodel->parameters->FindParam(&isslc,TransientIsslcEnum);
+	femmodel->parameters->FindParam(&isuq,QmuIsdakotaEnum);
 
-	#if defined(_HAVE_BAMG_) && !defined(_HAVE_AD_)
+#if defined(_HAVE_BAMG_) && !defined(_HAVE_AD_)
 	if(amr_frequency){
 		femmodel->parameters->FindParam(&amr_restart,AmrRestartEnum);
 		if(amr_restart) femmodel->ReMesh();
 	}
-	#endif
+#endif
 
-	#if defined(_HAVE_OCEAN_ )
+#if defined(_HAVE_OCEAN_ )
 	if(isoceancoupling) OceanExchangeDatax(femmodel,true);
-	#endif
+#endif
+
+#if defined(_HAVE_SEALEVELCHANGE_)
+	if(isslc) sealevelchange_initialgeometry(femmodel);
+#endif
+
+	//Resolve Mmes prior to running in transient: 
+	if(!isuq)UpdateMmesx(femmodel);
+
+}/*}}}*/
+void transient_postcore(FemModel* femmodel){/*{{{*/
+
+	bool       isslc;
+	femmodel->parameters->FindParam(&isslc,TransientIsslcEnum);
 
 	#if defined(_HAVE_SEALEVELCHANGE_)
-	if(isslc) sealevelchange_initialgeometry(femmodel);
+	if(isslc) sealevelchange_finalize(femmodel);
 	#endif
+	
 }/*}}}*/
 
 #ifdef _HAVE_CODIPACK_
 double transient_ad(FemModel* femmodel, double* G, double* Jlist){/*{{{*/
 
 	/*parameters: */
-	IssmDouble output_value;
 	IssmDouble finaltime,dt,yts,time;
-	bool       isoceancoupling;
-	int        step,timestepping;
-	int        checkpoint_frequency,num_responses;
+	int       isoceancoupling;
+	int       step,timestepping;
+	int       checkpoint_frequency,num_responses;
+	int		 *M = NULL;
+	int		 *control_enum;
 
 	/*Get rank*/
 	int my_rank = IssmComm::GetRank();
@@ -304,15 +317,17 @@ double transient_ad(FemModel* femmodel, double* G, double* Jlist){/*{{{*/
 	femmodel->parameters->FindParam(&timestepping,TimesteppingTypeEnum);
 	femmodel->parameters->FindParam(&num_responses,InversionNumCostFunctionsEnum);
 	femmodel->parameters->FindParam(&checkpoint_frequency,SettingsCheckpointFrequencyEnum); _assert_(checkpoint_frequency>0);
+	femmodel->parameters->FindParam(&control_enum,NULL,InversionControlParametersEnum);
+	femmodel->parameters->FindParam(&M,NULL,ControlInputSizeMEnum);
 
 	std::vector<IssmDouble> time_all;
 	std::vector<IssmDouble> dt_all;
 	std::vector<int>        checkpoint_steps;
 	int                     Ysize = 0;
+	CoDi_global            codi_y_data = {};
 	CountDoublesFunctor   *hdl_countdoubles = NULL;
 	RegisterInputFunctor  *hdl_regin        = NULL;
 	RegisterOutputFunctor *hdl_regout       = NULL;
-	SetAdjointFunctor     *hdl_setadjoint   = NULL;
 
 	while(time < finaltime - (yts*DBL_EPSILON)){ //make sure we run up to finaltime.
 
@@ -339,7 +354,7 @@ double transient_ad(FemModel* femmodel, double* G, double* Jlist){/*{{{*/
 
 		if(VerboseSolution()){
 			_printf0_("iteration " << step << "/" << ceil((finaltime-time)/dt)+step << \
-						"  time [yr]: " <<std::fixed<<setprecision(2)<< time/yts << " (time step: " << dt/yts << ")\n");
+					"  time [yr]: " <<std::fixed<<setprecision(2)<< time/yts << " (time step: " << dt/yts << ")\n");
 		}
 
 		/*Store Model State at the beginning of the step*/
@@ -356,8 +371,7 @@ double transient_ad(FemModel* femmodel, double* G, double* Jlist){/*{{{*/
 		DataSet* dependent_objects=((DataSetParam*)femmodel->parameters->FindParamObject(AutodiffDependentObjectsEnum))->value;
 		for(Object* & object:dependent_objects->objects){
 			DependentObject* dep=(DependentObject*)object;
-			dep->Responsex(&output_value,femmodel);
-			dep->AddValue(output_value);
+			dep->RecordResponsex(femmodel);
 		}
 
 		if(VerboseSolution()) _printf0_("   counting number of active variables\n");
@@ -378,7 +392,6 @@ double transient_ad(FemModel* femmodel, double* G, double* Jlist){/*{{{*/
 
 	/*Initialize model state adjoint (Yb)*/
 	double *Yb  = xNewZeroInit<double>(Ysize);
-	int    *Yin = xNewZeroInit<int>(Ysize);
 
 	/*Get final Ysize*/
 	hdl_countdoubles = new CountDoublesFunctor();
@@ -387,20 +400,13 @@ double transient_ad(FemModel* femmodel, double* G, double* Jlist){/*{{{*/
 	delete hdl_countdoubles;
 
 	/*Start tracing*/
-	#if _CODIPACK_MAJOR_==2
-	auto& tape_codi = IssmDouble::getTape();
-	#elif _CODIPACK_MAJOR_==1
-	auto& tape_codi = IssmDouble::getGlobalTape();
-	#else
-	#error "_CODIPACK_MAJOR_ not supported"
-	#endif
-	tape_codi.setActive();
+	codi_global.start();
 
 	/*Reverse dependent (f)*/
-	hdl_regin = new RegisterInputFunctor(Yin,Ysize);
+	hdl_regin = new RegisterInputFunctor(&codi_y_data);
 	femmodel->Marshall(hdl_regin);
 	delete hdl_regin;
-	if(my_rank==0) for(int i=0; i < Xsize; i++) tape_codi.registerInput(X[i]);
+	if(my_rank==0) for(int i=0; i < Xsize; i++) codi_global.registerInput(X[i]);
 	SetControlInputsFromVectorx(femmodel,X);
 
 	IssmDouble J     = 0.;
@@ -410,46 +416,37 @@ double transient_ad(FemModel* femmodel, double* G, double* Jlist){/*{{{*/
 		DependentObject* dep=(DependentObject*)object;
 		IssmDouble       output_value = dep->GetValue();
 
-
 		J += output_value;
-
-		tape_codi.registerOutput(J);
-		#if _CODIPACK_MAJOR_==2
-		codi_global.output_indices.push_back(J.getIdentifier());
-		#elif _CODIPACK_MAJOR_==1
-		codi_global.output_indices.push_back(J.getGradientData());
-		#else
-		#error "_CODIPACK_MAJOR_ not supported"
-		#endif
 
 		/*Keep track of output for printing*/
 		Jlist[count] = output_value.getValue();
-      count++;
+		count++;
 	}
 	Jlist[count] = J.getValue();
 	_assert_(count == num_responses);
 
-	tape_codi.setPassive();
+	codi_global.registerOutput(J);
+
+	codi_global.stop();
 
 	if(VerboseAutodiff())_printf0_("   CoDiPack fos_reverse\n");
-	for(int i=0;i<num_responses;i++){
-		if(my_rank==0) tape_codi.setGradient(codi_global.output_indices[i],1.0);
-		tape_codi.evaluate();
-	}
+	if(my_rank==0) codi_global.setGradient(0, 1.0);
+	codi_global.evaluate();
 
 	/*Initialize Xb and Yb*/
 	double *Xb  = xNewZeroInit<double>(Xsize);
-	for(int i=0;i<Xsize  ;i++) Xb[i] += X[i].gradient();
-	for(int i=0;i<Ysize_i;i++) Yb[i]  = tape_codi.gradient(Yin[i]);
+	codi_global.updateFullGradient(Xb, Xsize);
+	codi_y_data.getFullGradient(Yb, Ysize);
 
 	/*reverse loop for transient step (G)*/
 	for(vector<int>::reverse_iterator iter = checkpoint_steps.rbegin(); iter != checkpoint_steps.rend(); iter++){
 
 		/*Restore model from this step*/
 		int reverse_step = *iter;
-		tape_codi.reset();
 		femmodel->RestartAD(reverse_step);
-		tape_codi.setActive();
+
+		codi_y_data.clear();
+		codi_global.start();
 
 		/*Get new Ysize*/
 		hdl_countdoubles = new CountDoublesFunctor();
@@ -458,12 +455,12 @@ double transient_ad(FemModel* femmodel, double* G, double* Jlist){/*{{{*/
 		delete hdl_countdoubles;
 
 		/*We need to store the CoDiPack identifier here, since y is overwritten.*/
-		hdl_regin = new RegisterInputFunctor(Yin,Ysize);
+		hdl_regin = new RegisterInputFunctor(&codi_y_data);
 		femmodel->Marshall(hdl_regin);
 		delete hdl_regin;
 
 		/*Tell codipack that X is the independent*/
-		for(int i=0; i<Xsize; i++) tape_codi.registerInput(X[i]);
+		for(int i=0; i<Xsize; i++) codi_global.registerInput(X[i]);
 		SetControlInputsFromVectorx(femmodel,X);
 
 		/*Get New state*/
@@ -477,7 +474,7 @@ double transient_ad(FemModel* femmodel, double* G, double* Jlist){/*{{{*/
 
 			if(VerboseSolution()){
 				_printf0_("step "<<thisstep<<" ("<<ii+1<<"/"<<checkpoint_frequency<<") time [yr]: "\
-							<<std::fixed<<std::setprecision(2)<<thistime/yts<< " (time step: " << thisdt/yts << ")\n");
+						<<std::fixed<<std::setprecision(2)<<thistime/yts<< " (time step: " << thisdt/yts << ")\n");
 			}
 
 			transient_step(femmodel);
@@ -486,8 +483,7 @@ double transient_ad(FemModel* femmodel, double* G, double* Jlist){/*{{{*/
 			DataSet* dependent_objects=((DataSetParam*)femmodel->parameters->FindParamObject(AutodiffDependentObjectsEnum))->value;
 			for(Object* & object:dependent_objects->objects){
 				DependentObject* dep=(DependentObject*)object;
-				dep->Responsex(&output_value,femmodel);
-				dep->AddValue(output_value);
+				dep->RecordResponsex(femmodel);
 			}
 
 			/*First and last segment need special treatment*/
@@ -496,38 +492,42 @@ double transient_ad(FemModel* femmodel, double* G, double* Jlist){/*{{{*/
 		}
 
 		/*Register output*/
-		hdl_regout = new RegisterOutputFunctor();
+		hdl_regout = new RegisterOutputFunctor(&codi_y_data);
 		femmodel->Marshall(hdl_regout);
 		delete hdl_regout;
 
 		/*stop tracing*/
-		tape_codi.setPassive();
+		codi_global.stop();
 
 		/*Reverse transient step (G)*/
 		/* Using y_b here to seed the next reverse iteration there y_b is always overwritten*/
-		hdl_setadjoint = new SetAdjointFunctor(Yb,Ysize);
-		femmodel->Marshall(hdl_setadjoint);
-		delete hdl_setadjoint;
+		codi_y_data.setFullGradient(Yb, Ysize);
 
 		if(VerboseSolution()) _printf0_("computing gradient...\n");
-		tape_codi.evaluate();
+		codi_global.evaluate();
 
 		/* here we access the gradient data via the stored identifiers.*/
-		for(int i=0; i<Ysize_i; i++) Yb[i]  = tape_codi.gradient(Yin[i]);
-		for(int i=0; i<Xsize;   i++) Xb[i] += X[i].gradient();
+		codi_global.updateFullGradient(Xb, Xsize);
+		codi_y_data.getFullGradient(Yb, Ysize);	// Yb is overwritten here.
 	}
 
 	/*Clear tape*/
-	tape_codi.reset();
+	codi_global.clear();
 
 	/*Broadcast gradient to other ranks (make sure to sum all gradients)*/
 	ISSM_MPI_Allreduce(Xb,G,Xsize,ISSM_MPI_PDOUBLE,ISSM_MPI_SUM,IssmComm::GetComm());
+	#ifdef _ISSM_DEBUG_
+	for(int i=0; i<Xsize; i++){
+		if(xIsNan(Xb[i])) _error_("Found NaN in gradient at position "<<i);
+		if(xIsInf(Xb[i])) _error_("Found Inf in gradient at position "<<i);
+	}
+	#endif
 
 	/*Cleanup and return misfit*/
 	xDelete<IssmDouble>(X);
 	xDelete<double>(Xb);
 	xDelete<double>(Yb);
-	xDelete<int>(Yin);
-   return J.getValue();
+	xDelete<int>(control_enum);
+	return J.getValue();
 }/*}}}*/
 #endif

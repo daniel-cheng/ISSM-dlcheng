@@ -1,12 +1,12 @@
 function output = interpBedmachine(X,Y,string,continent),
 
 if strcmpi(continent,'antarctica'),
-	ncdate='2014-09-23';
-	morlighemnc=['/Users/larour/ModelData2/MMAntarctica2013/AntarcticaMCdataset-' ncdate '.nc'];
+	ncdate='2022-10-11';
+	morlighemnc=['~/ModelData/BedMachine/BedMachineAntarctica-' ncdate '.nc'];
 else
 	%ncdate='2015-10-05';
 	ncdate='2017-04-04';
-	morlighemnc=['/Users/larour/ModelData2/MMGreenland2013/MCdataset-' ncdate '.nc'];
+	morlighemnc=['~/ModelData2/MMGreenland2014/MCdataset-' ncdate '.nc'];
 end
 
 disp(['   -- BedMachine version: ' ncdate]);
