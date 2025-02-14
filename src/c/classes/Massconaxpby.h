@@ -119,15 +119,25 @@ class Massconaxpby: public Object, public Definition{
 		}
 		/*}}}*/
 		IssmDouble Response(FemModel* femmodel){/*{{{*/
+			//int ierr;
+			//IssmDouble xresponse,yresponse;
+
+			///*Get response from both masscons: */
+			//ierr=OutputDefinitionsResponsex(&xresponse,femmodel,this->namex);
+			//if(ierr) _error_("not found");
+			//ierr=OutputDefinitionsResponsex(&yresponse,femmodel,this->namey);
+			//if(ierr) _error_("not found");
+
+			//return this->alpha*xresponse+this->beta*yresponse;
 
 			IssmDouble time,starttime,finaltime,dt,yts;
 			int step;
 			int ierr;
-			femmodel->parameters->FindParam(&starttime,TimesteppingStartTimeEnum);
-			femmodel->parameters->FindParam(&finaltime,TimesteppingFinalTimeEnum);
-			femmodel->parameters->FindParam(&time,TimeEnum);
+			//femmodel->parameters->FindParam(&starttime,TimesteppingStartTimeEnum);
+			//femmodel->parameters->FindParam(&finaltime,TimesteppingFinalTimeEnum);
+			//femmodel->parameters->FindParam(&time,TimeEnum);
 			femmodel->parameters->FindParam(&step,StepEnum);
-			femmodel->parameters->FindParam(&yts,ConstantsYtsEnum);
+			//femmodel->parameters->FindParam(&yts,ConstantsYtsEnum);
 
 			IssmDouble xresponse,yresponse,axpbyresponse;
 			ExternalResult* xresult;
@@ -143,8 +153,8 @@ class Massconaxpby: public Object, public Definition{
 				xresponse = xresult->GetValue();
 			}
 			else {
-				ierr = OutputDefinitionsResponsex(&xresponse, femmodel, this->name);
-				if(ierr) _error_("Could not find response "<<this->name);
+				ierr = OutputDefinitionsResponsex(&xresponse, femmodel, this->namex);
+				if(ierr) _error_("Could not find response "<<this->namex);
 				femmodel->results->AddResult(new GenericExternalResult<IssmDouble>(femmodel->results->Size()+1,this->namex,xresponse,step,time));
 			}
 			if (yresult) {
@@ -152,74 +162,75 @@ class Massconaxpby: public Object, public Definition{
 				yresponse = yresult->GetValue();
 			}
 			else {
-				ierr = OutputDefinitionsResponsex(&yresponse, femmodel, this->name);
-				if(ierr) _error_("Could not find response "<<this->name);
+				ierr = OutputDefinitionsResponsex(&yresponse, femmodel, this->namey);
+				if(ierr) _error_("Could not find response "<<this->namey);
 				femmodel->results->AddResult(new GenericExternalResult<IssmDouble>(femmodel->results->Size()+1,this->namey,yresponse,step,time));
 			}
-
-			/*Get response from both masscons: */
-			if (time>=finaltime) {
-				/*parameters: */
-				bool       iscontrol,isautodiff;
-				int        timestepping;
-				char     **requested_outputs = NULL;
-				IssmDouble* element_accum_values = xNewZeroInit<IssmDouble>(3);
-
-				/*intermediary: */
-				/*first, figure out if there was a check point, if so, do a reset of the FemModel* femmodel structure. */
-				/*then recover parameters common to all solutions*/
-				femmodel->parameters->FindParam(&time,TimeEnum);
-				femmodel->parameters->FindParam(&timestepping,TimesteppingTypeEnum);
-
-				/*initialize:  */
-				femmodel->parameters->SetParam(starttime,TimeEnum);
-				femmodel->parameters->SetParam(0,StepEnum);
-				step = 0;
-				femmodel->parameters->FindParam(&time,TimeEnum);
-				while(time < finaltime){ //make sure we run up to finaltime.
-					/*Time Increment*/
-					switch(timestepping){
-						case AdaptiveTimesteppingEnum:
-							femmodel->TimeAdaptx(&dt);
-							if(time+dt>finaltime) dt=finaltime-time;
-							femmodel->parameters->SetParam(dt,TimesteppingTimeStepEnum);
-							break;
-						case FixedTimesteppingEnum:
-							femmodel->parameters->FindParam(&dt,TimesteppingTimeStepEnum);
-							break;
-						default:
-							_error_("Time stepping \""<<EnumToStringx(timestepping)<<"\" not supported yet");
-					}
-					step += 1;
-					time += dt;
-					femmodel->parameters->SetParam(time,TimeEnum);
-					femmodel->parameters->SetParam(step,StepEnum);
-
-					IssmDouble xresponse_value, yresponse_value;
-
-					/*Get response from both masscons: */
-					xresult = femmodel->results->FindResult(this->namex,step);
-					yresult = femmodel->results->FindResult(this->namey,step);
-					if (xresult) {
-						xresponse = xresult->GetValue();
-					} else {
-						_printf0_("   Defaulting: Massconaxpby.h:201 name: " << this->name << " xresponse: " << xresponse << " xresponse->name: " << this->namex << "\n");
-					}
-					if (yresult) {
-						yresponse = yresult->GetValue();
-					} else {
-						_printf0_("   Defaulting: Massconaxpby.h:206 name: " << this->name << " yresponse: " << yresponse << " yresponse->name: " << this->namey << "\n");
-					}
-					axpbyresponse = this->alpha*xresponse+this->beta*yresponse;
-					if (time < finaltime){ //make sure we run up to finaltime.
-						result = femmodel->results->FindResult(this->name,step);
-						result->SetValue(axpbyresponse);
-					} else {
-						return axpbyresponse;
-					}
-				}
-			}
 			return this->alpha*xresponse+this->beta*yresponse;
+
+			///*Get response from both masscons: */
+			//if (time>=finaltime) {
+			//	/*parameters: */
+			//	bool       iscontrol,isautodiff;
+			//	int        timestepping;
+			//	char     **requested_outputs = NULL;
+			//	IssmDouble* element_accum_values = xNewZeroInit<IssmDouble>(3);
+
+			//	/*intermediary: */
+			//	/*first, figure out if there was a check point, if so, do a reset of the FemModel* femmodel structure. */
+			//	/*then recover parameters common to all solutions*/
+			//	femmodel->parameters->FindParam(&time,TimeEnum);
+			//	femmodel->parameters->FindParam(&timestepping,TimesteppingTypeEnum);
+
+			//	/*initialize:  */
+			//	femmodel->parameters->SetParam(starttime,TimeEnum);
+			//	femmodel->parameters->SetParam(0,StepEnum);
+			//	step = 0;
+			//	femmodel->parameters->FindParam(&time,TimeEnum);
+			//	while(time < finaltime){ //make sure we run up to finaltime.
+			//		/*Time Increment*/
+			//		switch(timestepping){
+			//			case AdaptiveTimesteppingEnum:
+			//				femmodel->TimeAdaptx(&dt);
+			//				if(time+dt>finaltime) dt=finaltime-time;
+			//				femmodel->parameters->SetParam(dt,TimesteppingTimeStepEnum);
+			//				break;
+			//			case FixedTimesteppingEnum:
+			//				femmodel->parameters->FindParam(&dt,TimesteppingTimeStepEnum);
+			//				break;
+			//			default:
+			//				_error_("Time stepping \""<<EnumToStringx(timestepping)<<"\" not supported yet");
+			//		}
+			//		step += 1;
+			//		time += dt;
+			//		femmodel->parameters->SetParam(time,TimeEnum);
+			//		femmodel->parameters->SetParam(step,StepEnum);
+
+			//		IssmDouble xresponse_value, yresponse_value;
+
+			//		/*Get response from both masscons: */
+			//		xresult = femmodel->results->FindResult(this->namex,step);
+			//		yresult = femmodel->results->FindResult(this->namey,step);
+			//		if (xresult) {
+			//			xresponse = xresult->GetValue();
+			//		} else {
+			//			_printf0_("   Defaulting: Massconaxpby.h:201 name: " << this->name << " xresponse: " << xresponse << " xresponse->name: " << this->namex << "\n");
+			//		}
+			//		if (yresult) {
+			//			yresponse = yresult->GetValue();
+			//		} else {
+			//			_printf0_("   Defaulting: Massconaxpby.h:206 name: " << this->name << " yresponse: " << yresponse << " yresponse->name: " << this->namey << "\n");
+			//		}
+			//		axpbyresponse = this->alpha*xresponse+this->beta*yresponse;
+			//		if (time < finaltime){ //make sure we run up to finaltime.
+			//			result = femmodel->results->FindResult(this->name,step);
+			//			result->SetValue(axpbyresponse);
+			//		} else {
+			//			return axpbyresponse;
+			//		}
+			//	}
+			//}
+			//return this->alpha*xresponse+this->beta*yresponse;
 		} /*}}}*/
 };
 
