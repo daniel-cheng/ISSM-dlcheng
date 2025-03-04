@@ -1,0 +1,70 @@
+#-------------#
+# Environment #
+#-------------#
+
+#export CFLAGS="-O3"
+#export CXXFLAGS="-O3 -std=c++11"
+export CFLAGS="-g -Ofast"
+export CXXFLAGS="-g -Ofast -wd2196"
+
+#--------------------#
+# ISSM Configuration #
+#--------------------#
+
+ISSM_CONFIG='\
+    --prefix=$ISSM_DIR \
+    --with-wrappers=no \
+    --without-Love \
+    --without-Sealevelchange \
+    --without-kriging \
+    --with-mpi-include="${MPI_ROOT}/include" \
+    --with-mpi-libflags="-L${MPI_ROOT}/lib -lmpi" \
+    --with-parmetis-dir=${PETSC_DIR} \
+    --with-metis-dir=${PETSC_DIR} \
+    --with-mumps-dir=${PETSC_DIR} \
+    --with-mkl-libflags="-L${MKLROOT}/lib/intel64 -lmkl_intel_lp64 -lmkl_sequential -lmkl_scalapack_lp64 -lmkl_blacs_sgimpt_lp64 -lmkl_core -lpthread -lm" \
+    --with-m1qn3-dir="${ISSM_DIR}/externalpackages/m1qn3/install" \
+    --with-codipack-dir="$ISSM_DIR/externalpackages/codipack/install" \
+    --with-medipack-dir="$ISSM_DIR/externalpackages/medipack/install" \
+    --enable-tape-alloc \
+    --with-fortran-lib="-L${MKLROOT}/../compiler/lib/intel64_lin -lifcore -lifport -lgfortran" \
+    --enable-development
+'
+
+#-------------------#
+# External Packages #
+#-------------------#
+
+EXTERNALPACKAGES="
+	autotools	install-linux.sh
+	m1qn3		install-linux.sh
+    medipack    install.sh
+    codipack    install.sh
+"
+
+#---------#
+# Testing #
+#---------#
+
+# Test suites
+MATLAB_TEST=0
+PYTHON_TEST=0
+JAVASCRIPT_TEST=0
+EXAMPLES_TEST=0
+
+# Number of CPUs used in ISSM compilation
+#
+# NOTE: One is usually safer as some packages are very sensitive to parallel
+# 		compilation.
+#
+NUMCPUS_INSTALL=8
+
+# Number of CPUs used in the nightly runs
+NUMCPUS_RUN=1
+
+# Nightly run options
+#
+# See documentation in test/NightlyRun/runme.* for more information.
+#
+MATLAB_NROPTIONS=""
+PYTHON_NROPTIONS=""
