@@ -10,7 +10,7 @@ classdef pfe
 		% {{{
 		name           = 'pfe'
 		login          = '';
-		modules        = {'comp-intel/2018.3.222' '/nasa/intel/impi/2021.3/modulefiles/mpi/2021.3.0' 'scicon/app-tools'};
+		modules        = {'comp-intel' 'mpi-hpe/mpt' 'petsc/3.17.3_intel_mpt_py' 'scicon/app-tools'};
 		numnodes       = 20;
 		cpuspernode    = 8;
 		port           = 1025;
