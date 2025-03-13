@@ -97,7 +97,17 @@ class Massconaxpby: public Object, public Definition{
 		}
 		/*}}}*/
 		void Marshall(MarshallHandle* marshallhandle){/*{{{*/
-			_error_("not implemented yet!"); 
+			/*ok, marshall operations: */
+			int object_enum=MassconaxpbyEnum;
+			marshallhandle->call(object_enum);
+
+			marshallhandle->call(this->definitionenum);
+			marshallhandle->call(this->name);
+			marshallhandle->call(this->namex);
+			marshallhandle->call(this->namey);
+			marshallhandle->call(this->alpha);
+			marshallhandle->call(this->beta);
+			//_error_("not implemented yet!"); 
 		} 
 		/*}}}*/
 		int ObjectEnum(void){/*{{{*/

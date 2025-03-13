@@ -15,6 +15,12 @@
 #include <cstring>
 #include "./ExternalResult.h"
 #include "../../shared/shared.h"
+
+#include <stdio.h>
+#include <execinfo.h>
+#include <signal.h>
+#include <stdlib.h>
+#include <unistd.h>
 /*}}}*/
 
 template <class ResultType> 
@@ -75,7 +81,7 @@ class GenericExternalResult: public ExternalResult {
 			time        = 0;
 			value       = 0;
 		} /*}}}*/
-		GenericExternalResult(int in_id, int in_enum_type,ResultType in_values, int in_M,int in_N,int in_step,IssmDouble in_time){/*{{{*/
+		GenericExternalResult(int in_id, int in_enum_type,ResultType in_values, int in_M,int in_N,int in_step=UNDEF,IssmDouble in_time=UNDEF){/*{{{*/
 			id        = in_id;
 			step      = in_step;
 			time      = in_time;
@@ -97,7 +103,7 @@ class GenericExternalResult: public ExternalResult {
 			_error_("template GenericExternalResult(int in_id, int in_enum_type,double* in_values, int in_M,int in_N,int in_step,IssmDouble in_time) not implemented for this ResultType\n");
 		}
 		/*}}}*/
-		GenericExternalResult(int in_id, int in_enum_type,ResultType in_value,int in_step=UNDEF, IssmDouble in_time=UNDEF){ /*{{{*/
+		GenericExternalResult(int in_id, int in_enum_type,ResultType in_value,int in_step, IssmDouble in_time){ /*{{{*/
 			id        = in_id;
 			value     = in_value;
 			step      = in_step;
@@ -109,13 +115,25 @@ class GenericExternalResult: public ExternalResult {
 			EnumToStringx(&this->result_name,in_enum_type);
 		}
 		/*}}}*/
-		GenericExternalResult(int in_id,const char* in_result_name,ResultType in_value,int in_step=UNDEF, IssmDouble in_time=UNDEF){ /*{{{*/
-			id    = in_id;
-			value = in_value;
-			step  = in_step;
-			time  = in_time;
-			M     = 1;
-			N     = 1;
+		GenericExternalResult(int in_id, int in_enum_type,ResultType in_value){ /*{{{*/
+			id        = in_id;
+			value     = in_value;
+			step      = UNDEF;
+			time      = UNDEF;
+			M         = 1;
+			N         = 1;
+
+			/*Convert enum to name*/
+			EnumToStringx(&this->result_name,in_enum_type);
+		}
+		/*}}}*/
+		GenericExternalResult(int in_id,const char* in_result_name,ResultType in_value,int in_step, IssmDouble in_time){ /*{{{*/
+			id        = in_id;
+			value     = in_value;
+			step      = in_step;
+			time      = in_time;
+			M         = 1;
+			N         = 1;
 
 			/*Copy name*/
 			this->result_name = xNew<char>(strlen(in_result_name)+1);
@@ -261,14 +279,25 @@ template <> inline void GenericExternalResult<double>::Marshall(MarshallHandle* 
 /*Specific instantiations for char*: */
 template <> inline GenericExternalResult<char*>::GenericExternalResult(int in_id, int in_enum_type,char* in_value,int in_step, IssmDouble in_time){ /*{{{*/
 
-	id   = in_id;
-	step = in_step;
-	time = in_time;
-	M    = 1;
-	N    = 1;
-
+	id = in_id;
 	value = xNew<char>(strlen(in_value)+1);
 	xMemCpy<char>(value,in_value,(strlen(in_value)+1));
+	step  = in_step;
+	time  = in_time;
+	M     = 1;
+	N     = 1;
+
+	/*Convert enum to name*/
+	EnumToStringx(&this->result_name,in_enum_type);
+
+} /*}}}*/
+template <> inline GenericExternalResult<char*>::GenericExternalResult(int in_id, int in_enum_type,char* in_value){ /*{{{*/
+
+	id = in_id;
+	value = xNew<char>(strlen(in_value)+1);
+	xMemCpy<char>(value,in_value,(strlen(in_value)+1));
+	step = UNDEF;  
+	time  = UNDEF;
 
 	/*Convert enum to name*/
 	EnumToStringx(&this->result_name,in_enum_type);
@@ -493,6 +522,14 @@ template <> inline GenericExternalResult<IssmPDouble*>::GenericExternalResult(in
 }
 /*}}}*/
 template <> inline GenericExternalResult<IssmPDouble*>::GenericExternalResult(int in_id, int in_enum_type,IssmPDouble* in_value,int in_step, IssmDouble in_time){ /*{{{*/
+	void *array[10];
+	size_t size;
+
+	// get void*'s for all entries on the stack
+	size = backtrace(array, 10);
+
+	// print out all the frames to stderr
+	backtrace_symbols_fd(array, size, STDERR_FILENO);
 	_error_("you cannot initialize a GenericExternalResult<IssmPDouble*> without providing the dimensions of the matrix! Please use a more appropriate constructor!");
 } /*}}}*/
 template <> inline GenericExternalResult<IssmPDouble*>::~GenericExternalResult(){ /*{{{*/
@@ -859,6 +896,14 @@ template <> inline GenericExternalResult<Vector<IssmDouble>*>::~GenericExternalR
 	}
 	/*}}}*/
 	template <> inline void GenericExternalResult<Vector<IssmDouble>*>::Marshall(MarshallHandle* marshallhandle){/*{{{*/
+		void *array[10];
+		size_t size;
+
+		// get void*'s for all entries on the stack
+		size = backtrace(array, 10);
+
+		// print out all the frames to stderr
+		backtrace_symbols_fd(array, size, STDERR_FILENO);
 		_error_("GenericExternalResult instantiated for type Vector<IssmDouble>* called " << result_name << " not implemented yet");
 	}  /*}}}*/
 

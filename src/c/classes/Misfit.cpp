@@ -91,7 +91,21 @@ int Misfit::Id(void){/*{{{*/
 }
 /*}}}*/
 void Misfit::Marshall(MarshallHandle* marshallhandle){/*{{{*/
-	_error_("not implemented yet!");
+	/*ok, marshall operations: */
+	int object_enum=MisfitEnum;
+	marshallhandle->call(object_enum);
+
+	marshallhandle->call(this->definitionenum);
+	marshallhandle->call(this->name);
+	marshallhandle->call(this->misfit);
+	marshallhandle->call(this->model_enum);
+	marshallhandle->call(this->observation_enum);
+	marshallhandle->call(this->weights_enum);
+	marshallhandle->call(this->timeinterpolation);
+	marshallhandle->call(this->local);
+	marshallhandle->call(this->misfit);
+	marshallhandle->call(this->lock);
+	//_error_("not implemented yet!");
 }
 /*}}}*/
 int Misfit::ObjectEnum(void){/*{{{*/
