@@ -105,10 +105,8 @@ void OutputResultsx(FemModel* femmodel){
 #else
 	femmodel->parameters->Delete(OutputFilePointerEnum);
 
-	/*Normally, delete and reinitialize results, in parallel: */
-	/*Here, save results deletion for end of transient runs in 
-	case of needed results retrieval in AD mode (cleared in FemModel.cpp::CleanUp())*/
-	//femmodel->results->clear();
+	/*Delete and reinitialize results, in parallel: */
+	femmodel->results->clear();
 
 	/*Close output file? :*/
 	if(io_gather){

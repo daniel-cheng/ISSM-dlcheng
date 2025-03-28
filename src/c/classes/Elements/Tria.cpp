@@ -4519,7 +4519,7 @@ IssmDouble Tria::Misfit(int modelenum,int observationenum,int weightsenum){/*{{{
 		weights_input->GetInputValue(&weight,gauss);
 
 		/*compute misfit between model and observation */
-		Jelem+=sqrt((model-observation)*(model-observation))*Jdet*weight*gauss->weight;
+		Jelem+=0.5*(model-observation)*(model-observation)*Jdet*weight*gauss->weight;
 	}
 
 	/* clean up and Return: */
