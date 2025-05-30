@@ -1496,6 +1496,7 @@ const char* EnumToStringx(int en){
 		case CfrheologybbarabsgradEnum : return "Cfrheologybbarabsgrad";
 		case CfrheologybbarabsgradtransientEnum : return "Cfrheologybbarabsgradtransient";
 		case CfsurfacelogvelEnum : return "Cfsurfacelogvel";
+		case CfsurfacelogveltransientEnum : return "Cfsurfacelogveltransient";
 		case CfsurfacesquareEnum : return "Cfsurfacesquare";
 		case CfsurfacesquaretransientEnum : return "Cfsurfacesquaretransient";
 		case CflevelsetmisfitEnum : return "Cflevelsetmisfit";

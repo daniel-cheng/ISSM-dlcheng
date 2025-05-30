@@ -1493,6 +1493,7 @@ enum definitions{
 	CfrheologybbarabsgradEnum,
 	CfrheologybbarabsgradtransientEnum,
 	CfsurfacelogvelEnum,
+	CfsurfacelogveltransientEnum,
 	CfsurfacesquareEnum,
 	CfsurfacesquaretransientEnum,
 	CflevelsetmisfitEnum,

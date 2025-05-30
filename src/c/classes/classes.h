@@ -29,6 +29,7 @@
 #include "./Cfrheologybbarabsgrad.h"
 #include "./Cfrheologybbarabsgradtransient.h"
 #include "./Cfsurfacelogvel.h"
+#include "./Cfsurfacelogveltransient.h"
 #include "./Cflevelsetmisfit.h"
 #include "./Masscon.h"
 #include "./Massconaxpby.h"

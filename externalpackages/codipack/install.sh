@@ -2,9 +2,11 @@
 set -eu
 
 VER=1.8
+PREFIX="${ISSM_DIR}/externalpackages/codipack/install" # Set to location where external package should be installed
 
-# Cleanup from previous installation
-rm -rf install CoDiPack-$VER.tar.gz
+# Cleanup
+rm -rf ${PREFIX} CoDiPack-$VER.tar.gz
+mkdir -p ${PREFIX}
 
 #Download development version
 git clone https://github.com/SciCompKL/CoDiPack.git install

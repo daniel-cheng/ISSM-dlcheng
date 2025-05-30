@@ -1483,6 +1483,7 @@
 	CfrheologybbarabsgradEnum
 	CfrheologybbarabsgradtransientEnum
 	CfsurfacelogvelEnum
+	CfsurfacelogveltransientEnum
 	CfsurfacesquareEnum
 	CfsurfacesquaretransientEnum
 	CflevelsetmisfitEnum
@@ -3337,6 +3338,7 @@ function EnumToString(enum::IssmEnum)
 	if(enum==CfrheologybbarabsgradEnum) return "Cfrheologybbarabsgrad" end
 	if(enum==CfrheologybbarabsgradtransientEnum) return "Cfrheologybbarabsgradtransient" end
 	if(enum==CfsurfacelogvelEnum) return "Cfsurfacelogvel" end
+	if(enum==CfsurfacelogveltransientEnum) return "Cfsurfacelogveltransient" end
 	if(enum==CfsurfacesquareEnum) return "Cfsurfacesquare" end
 	if(enum==CfsurfacesquaretransientEnum) return "Cfsurfacesquaretransient" end
 	if(enum==CflevelsetmisfitEnum) return "Cflevelsetmisfit" end
@@ -5191,6 +5193,7 @@ function StringToEnum(name::String)
 	if(name=="Cfrheologybbarabsgrad") return CfrheologybbarabsgradEnum  end
 	if(name=="Cfrheologybbarabsgradtransient") return CfrheologybbarabsgradtransientEnum  end
 	if(name=="Cfsurfacelogvel") return CfsurfacelogvelEnum  end
+	if(name=="Cfsurfacelogveltransient") return CfsurfacelogveltransientEnum  end
 	if(name=="Cfsurfacesquare") return CfsurfacesquareEnum  end
 	if(name=="Cfsurfacesquaretransient") return CfsurfacesquaretransientEnum  end
 	if(name=="Cflevelsetmisfit") return CflevelsetmisfitEnum  end

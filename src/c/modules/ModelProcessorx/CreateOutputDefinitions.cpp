@@ -343,40 +343,40 @@ void CreateOutputDefinitions(Elements* elements,Parameters* parameters,Inputs* i
 				char       **cfssqt_name_s                = NULL;
 				char       **cfssqt_definitionstring_s    = NULL;
 				char       **cfssqt_model_string_s        = NULL;
-				IssmDouble **cfssqt_observations_s        = NULL;
-				int         *cfssqt_observations_M_s      = NULL;
-				int         *cfssqt_observations_N_s      = NULL;
+				IssmDouble **cfssqt_observations        = NULL;
+				int         *cfssqt_observations_M      = NULL;
+				int         *cfssqt_observations_N      = NULL;
 				IssmDouble **cfssqt_weights_s             = NULL;
-				int         *cfssqt_weights_M_s           = NULL;
-				int         *cfssqt_weights_N_s           = NULL;
+				int         *cfssqt_weights_M           = NULL;
+				int         *cfssqt_weights_N           = NULL;
 
 				/*Fetch name, model_string, observation, observation_string, etc ... (see src/m/classes/cfsurfacesquaretransient.m): */
 				iomodel->FetchMultipleData(&cfssqt_name_s,&num_cfsurfacesquaretransients,"md.cfsurfacesquaretransient.name");
 				iomodel->FetchMultipleData(&cfssqt_definitionstring_s,&test,"md.cfsurfacesquaretransient.definitionstring"); _assert_(test==num_cfsurfacesquaretransients);
 				iomodel->FetchMultipleData(&cfssqt_model_string_s,&test,"md.cfsurfacesquaretransient.model_string"); _assert_(test==num_cfsurfacesquaretransients);
-				iomodel->FetchMultipleData(&cfssqt_observations_s,&cfssqt_observations_M_s,&cfssqt_observations_N_s,&test, "md.cfsurfacesquaretransient.observations"); _assert_(test==num_cfsurfacesquaretransients);
-				iomodel->FetchMultipleData(&cfssqt_weights_s,&cfssqt_weights_M_s,&cfssqt_weights_N_s, &test,"md.cfsurfacesquaretransient.weights"); _assert_(test==num_cfsurfacesquaretransients);
+				iomodel->FetchMultipleData(&cfssqt_observations,&cfssqt_observations_M,&cfssqt_observations_N,&test, "md.cfsurfacesquaretransient.observations"); _assert_(test==num_cfsurfacesquaretransients);
+				iomodel->FetchMultipleData(&cfssqt_weights_s,&cfssqt_weights_M,&cfssqt_weights_N, &test,"md.cfsurfacesquaretransient.weights"); _assert_(test==num_cfsurfacesquaretransients);
 
 				for(j=0;j<num_cfsurfacesquaretransients;j++){
 
                /*Check that we can use P1 inputs*/
-					if (cfssqt_observations_M_s[j]!=(iomodel->numberofvertices+1)) _error_("observations should be a P1 time series");
-               if (cfssqt_weights_M_s[j]!=iomodel->numberofvertices+1)        _error_("weights should be a P1 time series");
-					_assert_(cfssqt_observations_N_s[j]>0);
+					if (cfssqt_observations_M[j]!=(iomodel->numberofvertices+1)) _error_("observations should be a P1 time series");
+               if (cfssqt_weights_M[j]!=iomodel->numberofvertices+1)        _error_("weights should be a P1 time series");
+					_assert_(cfssqt_observations_N[j]>0);
 
 					/*extract data times from last row of observations*/
-					IssmDouble *datatimes = xNew<IssmDouble>(cfssqt_observations_N_s[j]);
-					for(int k=0;k<cfssqt_observations_N_s[j];k++) datatimes[k] = (cfssqt_observations_s[j])[cfssqt_observations_N_s[j]*(cfssqt_weights_M_s[j]-1)+k];
+					IssmDouble *datatimes = xNew<IssmDouble>(cfssqt_observations_N[j]);
+					for(int k=0;k<cfssqt_observations_N[j];k++) datatimes[k] = (cfssqt_observations[j])[cfssqt_observations_N[j]*(cfssqt_weights_M[j]-1)+k];
 
 					/*First create a cfsurfacesquaretransient object for that specific string (cfssqt_model_string_s[j]):*/
-					output_definitions->AddObject(new Cfsurfacesquaretransient(cfssqt_name_s[j], StringToEnumx(cfssqt_definitionstring_s[j]), StringToEnumx(cfssqt_model_string_s[j]), cfssqt_observations_N_s[j],datatimes ));
+					output_definitions->AddObject(new Cfsurfacesquaretransient(cfssqt_name_s[j], StringToEnumx(cfssqt_definitionstring_s[j]), StringToEnumx(cfssqt_model_string_s[j]), cfssqt_observations_N[j],datatimes ));
 					xDelete<IssmDouble>(datatimes);
 
 					/*Now, for this particular cfsurfacesquaretransient object, make sure we plug into the elements: the observation, and the weights.*/
 					for(Object* & object : elements->objects){
 						Element* element=xDynamicCast<Element*>(object);
-						element->DatasetInputAdd(StringToEnumx(cfssqt_definitionstring_s[j]),cfssqt_observations_s[j],inputs,iomodel,cfssqt_observations_M_s[j],cfssqt_observations_N_s[j],1,SurfaceObservationEnum,SurfaceObservationEnum);
-						element->DatasetInputAdd(StringToEnumx(cfssqt_definitionstring_s[j]),cfssqt_weights_s[j],inputs,iomodel,cfssqt_weights_M_s[j],cfssqt_weights_N_s[j],1,WeightsSurfaceObservationEnum,WeightsSurfaceObservationEnum);
+						element->DatasetInputAdd(StringToEnumx(cfssqt_definitionstring_s[j]),cfssqt_observations[j],inputs,iomodel,cfssqt_observations_M[j],cfssqt_observations_N[j],1,SurfaceObservationEnum,SurfaceObservationEnum);
+						element->DatasetInputAdd(StringToEnumx(cfssqt_definitionstring_s[j]),cfssqt_weights_s[j],inputs,iomodel,cfssqt_weights_M[j],cfssqt_weights_N[j],1,WeightsSurfaceObservationEnum,WeightsSurfaceObservationEnum);
 
 					}
 				}
@@ -388,18 +388,18 @@ void CreateOutputDefinitions(Elements* elements,Parameters* parameters,Inputs* i
 					string = cfssqt_definitionstring_s[j];		xDelete<char>(string);
 					string = cfssqt_model_string_s[j];			xDelete<char>(string);
 					string = cfssqt_name_s[j];    xDelete<char>(string);
-					matrix = cfssqt_observations_s[j]; xDelete<IssmDouble>(matrix);
+					matrix = cfssqt_observations[j]; xDelete<IssmDouble>(matrix);
 					matrix = cfssqt_weights_s[j]; xDelete<IssmDouble>(matrix);
 				}
 				xDelete<char*>(cfssqt_name_s);
 				xDelete<char*>(cfssqt_model_string_s);
 				xDelete<char*>(cfssqt_definitionstring_s);
-				xDelete<IssmDouble*>(cfssqt_observations_s);
-				xDelete<int>(cfssqt_observations_M_s);
-				xDelete<int>(cfssqt_observations_N_s);
+				xDelete<IssmDouble*>(cfssqt_observations);
+				xDelete<int>(cfssqt_observations_M);
+				xDelete<int>(cfssqt_observations_N);
 				xDelete<IssmDouble*>(cfssqt_weights_s);
-				xDelete<int>(cfssqt_weights_M_s);
-				xDelete<int>(cfssqt_weights_N_s);
+				xDelete<int>(cfssqt_weights_M);
+				xDelete<int>(cfssqt_weights_N);
 				/*}}}*/
 			}
 			else if (output_definition_enums[i]==CfdragcoeffabsgradEnum){
@@ -728,6 +728,83 @@ void CreateOutputDefinitions(Elements* elements,Parameters* parameters,Inputs* i
 				xDelete<int>(cfsurfacelogvel_weights_N);
 				xDelete<char*>(cfsurfacelogvel_weightstring);
 				xDelete<IssmDouble>(cfsurfacelogvel_datatime);
+				/*}}}*/
+			}
+			else if (output_definition_enums[i]==CfsurfacelogveltransientEnum){
+				/*Deal with cfsurfacelogveltransient: {{{*/
+
+				/*cfsurfacelogveltransient variables: */
+				int          num_cfsurfacelogveltransients,test;
+				char       **cfslvt_name_s                = NULL;
+				char       **cfslvt_definitionstring_s    = NULL;
+				IssmDouble **cfslvt_vxobs                 = NULL;
+				IssmDouble **cfslvt_vyobs                 = NULL;
+				char       **cfslvt_vxobsstring_s         = NULL;
+				char       **cfslvt_vyobsstring_s         = NULL;
+				int         *cfslvt_observations_M         = NULL;
+				int         *cfslvt_observations_N         = NULL;
+				IssmDouble **cfslvt_weights               = NULL;
+				int         *cfslvt_weights_M             = NULL;
+				int         *cfslvt_weights_N             = NULL;
+				char       **cfslvt_weightsstring_s       = NULL;
+
+
+				iomodel->FetchMultipleData(&cfslvt_name_s,&num_cfsurfacelogveltransients,"md.cfsurfacelogveltransient.name");
+				iomodel->FetchMultipleData(&cfslvt_definitionstring_s,&test,"md.cfsurfacelogveltransient.definitionstring");
+				iomodel->FetchMultipleData(&cfslvt_vxobs,&cfslvt_observations_M,&cfslvt_observations_N,&test, "md.cfsurfacelogveltransient.vxobs");
+				iomodel->FetchMultipleData(&cfslvt_vxobsstring_s,&test,"md.cfsurfacelogveltransient.vxobs_string");
+				iomodel->FetchMultipleData(&cfslvt_vyobs,&cfslvt_observations_M,&cfslvt_observations_N,&test, "md.cfsurfacelogveltransient.vyobs"); //assume same vxobs and vyobs dimensions
+				iomodel->FetchMultipleData(&cfslvt_vyobsstring_s,&test,"md.cfsurfacelogveltransient.vyobs_string");
+				iomodel->FetchMultipleData(&cfslvt_weights,&cfslvt_weights_M,&cfslvt_weights_N, &test,"md.cfsurfacelogveltransient.weights");
+				iomodel->FetchMultipleData(&cfslvt_weightsstring_s,&test,"md.cfsurfacelogveltransient.weights_string");
+
+				for(j=0;j<num_cfsurfacelogveltransients;j++){
+
+				/*Check that we can use P1 inputs*/
+				if (cfslvt_observations_M[j]!=(iomodel->numberofvertices+1)) _error_("observations should be a P1 time series");
+				if (cfslvt_weights_M[j]!=iomodel->numberofvertices+1)        _error_("weights should be a P1 time series");
+					_assert_(cfslvt_observations_N[j]>0);
+
+					/*extract data times from last row of observations*/
+					IssmDouble *datatimes = xNew<IssmDouble>(cfslvt_observations_N[j]);
+					for(int k=0;k<cfslvt_observations_N[j];k++) datatimes[k] = (cfslvt_vxobs[j])[cfslvt_observations_N[j]*(cfslvt_weights_M[j]-1)+k];
+
+					/*First create a cfsurfacelogveltransient object for that specific string (cfslvt_model_string_s[j]):*/
+					output_definitions->AddObject(new Cfsurfacelogveltransient(cfslvt_name_s[j], StringToEnumx(cfslvt_definitionstring_s[j]), cfslvt_observations_N[j],datatimes ));
+					xDelete<IssmDouble>(datatimes);
+
+					/*Now, for this particular cfsurfacelogveltransient object, make sure we plug into the elements: the observation, and the weights.*/
+					for(Object* & object : elements->objects){
+						Element* element=xDynamicCast<Element*>(object);
+						element->DatasetInputAdd(StringToEnumx(cfslvt_definitionstring_s[j]),cfslvt_vxobs[j],inputs,iomodel,cfslvt_observations_M[j],cfslvt_observations_N[j],1,StringToEnumx(cfslvt_vxobsstring_s[j]),VxObsEnum);
+						element->DatasetInputAdd(StringToEnumx(cfslvt_definitionstring_s[j]),cfslvt_vyobs[j],inputs,iomodel,cfslvt_observations_M[j],cfslvt_observations_N[j],1,StringToEnumx(cfslvt_vyobsstring_s[j]),VyObsEnum);
+						element->DatasetInputAdd(StringToEnumx(cfslvt_definitionstring_s[j]),cfslvt_weights[j],inputs,iomodel,cfslvt_weights_M[j],cfslvt_weights_N[j],1,StringToEnumx(cfslvt_weightsstring_s[j]),WeightsSurfaceObservationEnum);
+					}
+				}
+
+				/*Free resources:*/
+				for(j=0;j<num_cfsurfacelogveltransients;j++){
+					char* string=NULL;
+					IssmDouble* matrix = NULL;
+					string = cfslvt_definitionstring_s[j];		xDelete<char>(string);
+					string = cfslvt_vxobsstring_s[j];			xDelete<char>(string);
+					string = cfslvt_vyobsstring_s[j];			xDelete<char>(string);
+					string = cfslvt_name_s[j];    xDelete<char>(string);
+					matrix = cfslvt_vxobs[j]; xDelete<IssmDouble>(matrix);
+					matrix = cfslvt_vyobs[j]; xDelete<IssmDouble>(matrix);
+					matrix = cfslvt_weights[j]; xDelete<IssmDouble>(matrix);
+				}
+				xDelete<char*>(cfslvt_name_s);
+				xDelete<char*>(cfslvt_vxobsstring_s);
+				xDelete<char*>(cfslvt_vyobsstring_s);
+				xDelete<char*>(cfslvt_definitionstring_s);
+				xDelete<IssmDouble*>(cfslvt_vxobs);
+				xDelete<IssmDouble*>(cfslvt_vyobs);
+				xDelete<int>(cfslvt_observations_M);
+				xDelete<int>(cfslvt_observations_N);
+				xDelete<IssmDouble*>(cfslvt_weights);
+				xDelete<int>(cfslvt_weights_M);
+				xDelete<int>(cfslvt_weights_N);
 				/*}}}*/
 			}
 			else if (output_definition_enums[i]==CflevelsetmisfitEnum){

@@ -87,6 +87,7 @@ issm_sources += \
 	./classes/Cfrheologybbarabsgrad.cpp \
 	./classes/Cfrheologybbarabsgradtransient.cpp \
 	./classes/Cfsurfacelogvel.cpp \
+	./classes/Cfsurfacelogveltransient.cpp \
 	./classes/Cflevelsetmisfit.cpp \
 	./classes/Regionaloutput.cpp \
 	./classes/Nodalvalue.cpp \

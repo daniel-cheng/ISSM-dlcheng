@@ -1,4 +1,4 @@
-MATLAB_PATH="/usr/local/MATLAB/R2023b"
+MATLAB_PATH="/usr/local/matlab"
 
 #--------------------#
 # ISSM Configuration #
@@ -63,7 +63,7 @@ EXAMPLES_TEST=0
 # NOTE: One is usually safer as some packages are very sensitive to parallel
 # 		compilation.
 #
-NUMCPUS_INSTALL=8
+NUMCPUS_INSTALL=32
 
 # Number of CPUs used in the nightly runs
 NUMCPUS_RUN=2

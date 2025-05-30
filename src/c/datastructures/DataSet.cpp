@@ -270,6 +270,11 @@ void  DataSet::Marshall(MarshallHandle* marshallhandle){ /*{{{*/
 				cfsurf->Marshall(marshallhandle);
 				this->AddObject(cfsurf);
 			}
+			else if(obj_enum==CfsurfacelogveltransientEnum){
+				Cfsurfacelogveltransient* cfsurf=new Cfsurfacelogveltransient();
+				cfsurf->Marshall(marshallhandle);
+				this->AddObject(cfsurf);
+			}
 			else if(obj_enum==CfdragcoeffabsgradEnum){
 				Cfdragcoeffabsgrad* cfdragcoeff=new Cfdragcoeffabsgrad();
 				cfdragcoeff->Marshall(marshallhandle);

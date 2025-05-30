@@ -1487,6 +1487,7 @@ syn keyword juliaConstC CfdragcoeffabsgradtransientEnum
 syn keyword juliaConstC CfrheologybbarabsgradEnum
 syn keyword juliaConstC CfrheologybbarabsgradtransientEnum
 syn keyword juliaConstC CfsurfacelogvelEnum
+syn keyword juliaConstC CfsurfacelogveltransientEnum
 syn keyword juliaConstC CfsurfacesquareEnum
 syn keyword juliaConstC CfsurfacesquaretransientEnum
 syn keyword juliaConstC CflevelsetmisfitEnum
