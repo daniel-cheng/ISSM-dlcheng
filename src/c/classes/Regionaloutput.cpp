@@ -10,6 +10,11 @@
 #endif
 
 /*Headers:*/
+#include <execinfo.h>   // for backtrace()
+#include <unistd.h>     // for STDERR_FILENO
+#include <iostream>
+#include <cstdlib>
+
 #include "./classes.h"
 #include "./Definition.h"
 #include "./Elements/Element.h"
@@ -19,6 +24,16 @@
 
 /*}}}*/
 
+Regionaloutput::Regionaloutput(){/*{{{*/
+
+	this->definitionenum = -1;
+	this->outputname = NULL;
+	this->name = NULL;
+	this->mask = NULL;
+	this->M = 0.;
+
+}
+/*}}}*/
 Regionaloutput::Regionaloutput(char* in_name, int in_definitionenum, char* in_outputname, IssmDouble* maskin, int Min){ /*{{{*/
 
 	this->definitionenum=in_definitionenum;
@@ -35,9 +50,37 @@ Regionaloutput::Regionaloutput(char* in_name, int in_definitionenum, char* in_ou
 }
 /*}}}*/
 Regionaloutput::~Regionaloutput(){/*{{{*/
-	if(this->name)xDelete(this->name);
-	if(this->outputname)xDelete(this->outputname);
-	if(this->mask)xDelete(this->mask);
+	//this->Echo();
+	//void* addrlist[64 + 1];
+
+    //// Retrieve current stack addresses
+    //int addrlen = backtrace(addrlist, sizeof(addrlist) / sizeof(void*));
+
+    //if (addrlen == 0) {
+    //    std::cerr << "  <empty, possibly corrupt stack>\n";
+    //    return;
+    //}
+
+    //// Print out all the frames to stderr
+    //char** symbollist = backtrace_symbols(addrlist, addrlen);
+
+    //for (int i = 0; i < addrlen; i++) {
+    //    std::cerr << symbollist[i] << std::endl;
+    //}
+
+    //free(symbollist);
+	if(this->name) {
+		xDelete(this->name);
+	}
+	if(this->outputname){
+		xDelete(this->outputname);
+	}
+	if(this->mask) {
+		//_printf_("    mask with size " + std::to_string(this->M) + " deleting...\n");
+		xDelete(this->mask);
+		//this->M = 0;
+		//_printf_("    mask deleted!\n");
+	}
 }
 /*}}}*/
 
@@ -63,7 +106,15 @@ int Regionaloutput::Id(void){/*{{{*/
 }
 /*}}}*/
 void Regionaloutput::Marshall(MarshallHandle* marshallhandle){/*{{{*/
-	_error_("not implemented yet!");
+	//_error_("not implemented yet!");
+	int object_enum=RegionaloutputEnum;
+	marshallhandle->call(object_enum);
+
+	marshallhandle->call(this->definitionenum);
+	marshallhandle->call(this->outputname);
+	marshallhandle->call(this->name);
+	marshallhandle->call(this->mask);
+	marshallhandle->call(this->M);
 }
 /*}}}*/
 int Regionaloutput::ObjectEnum(void){/*{{{*/
@@ -99,9 +150,6 @@ IssmDouble Regionaloutput::Response(FemModel* femmodel){/*{{{*/
 				break;
 			case GroundedAreaScaledEnum:
 				val_t+=element->GroundedArea(this->mask,true);
-				break;
-			case GroundinglineMassFluxEnum:
-				val_t+=element->GroundinglineMassFlux(this->mask,false);
 				break;
 			case FloatingAreaEnum:
 				val_t+=element->FloatingArea(this->mask,false);

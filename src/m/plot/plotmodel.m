@@ -71,6 +71,14 @@ if numberofplots,
 				set(gcf,'Position',[40 1580 560*1.25 420*1.25]);  %left, bottom, width, height; W=560 H=420 is default
 			elseif strcmpi(figposition,'fullscreen'),
 				set(gcf,'Position',get(0,'ScreenSize'));
+			elseif strcmpi(figposition,'halfbottom'),
+				screen=get(0,'ScreenSize');
+				left=screen(1); bott=screen(2); widt=screen(3); heig=screen(4)-25;
+				set(gcf,'Position',fix([left bott widt heig/2]));
+			elseif strcmpi(figposition,'halftop'),
+				screen=get(0,'ScreenSize');
+				left=screen(1); bott=screen(2); widt=screen(3); heig=screen(4)-25;
+				set(gcf,'Position',fix([left bott+heig/2 widt heig/2]));
 			elseif strcmpi(figposition,'halfright'),
 				screen=get(0,'ScreenSize');
 				left=screen(1); bott=screen(2); widt=screen(3); heig=screen(4)-25;

@@ -153,6 +153,98 @@ void CreateOutputDefinitions(Elements* elements,Parameters* parameters,Inputs* i
 				xDelete<char*>(misfit_weights_string_s);
 				/*}}}*/
 			}
+			//else if (output_definition_enums[i]==MisfitannualEnum){
+			//	/*Deal with misfits: {{{*/
+
+			//	/*misfit variables: */
+			//	int          nummisfits;
+			//	char**       misfit_name_s						= NULL;    
+			//	char**		 misfit_definitionstring_s		= NULL;    
+			//	char**       misfit_model_string_s			= NULL;
+			//	IssmDouble** misfit_observation_s			= NULL;
+			//	char**		 misfit_observation_string_s	= NULL;
+			//	int*         misfit_observation_M_s			= NULL;
+			//	int*         misfit_observation_N_s			= NULL;
+			//	int*         misfit_local_s					= NULL;
+			//	char**       misfit_timeinterpolation_s	= NULL;
+			//	IssmDouble** misfit_weights_s					= NULL;
+			//	int*         misfit_weights_M_s				= NULL;
+			//	int*         misfit_weights_N_s				= NULL;
+			//	char**       misfit_weights_string_s		= NULL;
+
+			//	/*Fetch name, model_string, observation, observation_string, etc ... (see src/m/classes/misfit.m): */
+			//	iomodel->FetchMultipleData(&misfit_name_s,&nummisfits,                                                        "md.misfitannual.name");
+			//	iomodel->FetchMultipleData(&misfit_definitionstring_s,&nummisfits,                                            "md.misfitannual.definitionstring");
+			//	iomodel->FetchMultipleData(&misfit_model_string_s,&nummisfits,                                                "md.misfitannual.model_string");
+			//	iomodel->FetchMultipleData(&misfit_observation_s,&misfit_observation_M_s,&misfit_observation_N_s,&nummisfits, "md.misfitannual.observation");
+			//	iomodel->FetchMultipleData(&misfit_observation_string_s,&nummisfits,                                          "md.misfitannual.observation_string");
+			//	iomodel->FetchMultipleData(&misfit_timeinterpolation_s,&nummisfits,                                           "md.misfitannual.timeinterpolation");
+			//	iomodel->FetchMultipleData(&misfit_local_s,&nummisfits,                                                       "md.misfitannual.local");
+			//	iomodel->FetchMultipleData(&misfit_weights_s,&misfit_weights_M_s,&misfit_weights_N_s,&nummisfits,             "md.misfitannual.weights");
+			//	iomodel->FetchMultipleData(&misfit_weights_string_s,&nummisfits,                                              "md.misfitannual.weights_string");
+
+			//	for(j=0;j<nummisfits;j++){
+
+			//		int obs_vector_type=0;
+			//		if ((misfit_observation_M_s[j]==iomodel->numberofvertices) || (misfit_observation_M_s[j]==iomodel->numberofvertices+1)){
+			//			obs_vector_type=1;
+			//		}
+			//		else if ((misfit_observation_M_s[j]==iomodel->numberofelements) || (misfit_observation_M_s[j]==iomodel->numberofelements+1)){
+			//			obs_vector_type=2;
+			//		}
+			//		else
+			//		 _error_("misfit observation size not supported yet");
+
+			//		int weight_vector_type=0;
+			//		if ((misfit_weights_M_s[j]==iomodel->numberofvertices) || (misfit_weights_M_s[j]==iomodel->numberofvertices+1)){
+			//			weight_vector_type=1;
+			//		}
+			//		else if ((misfit_weights_M_s[j]==iomodel->numberofelements) || (misfit_weights_M_s[j]==iomodel->numberofelements+1)){
+			//			weight_vector_type=2;
+			//		}
+			//		else
+			//		 _error_("misfit weight size not supported yet");
+
+			//		/*First create a misfit object for that specific string (misfit_model_string_s[j]):*/
+			//		output_definitions->AddObject(new MisfitAnnual(misfit_name_s[j],StringToEnumx(misfit_definitionstring_s[j]),StringToEnumx(misfit_model_string_s[j]),StringToEnumx(misfit_observation_string_s[j]),misfit_timeinterpolation_s[j],misfit_local_s[j],StringToEnumx(misfit_weights_string_s[j])));
+
+			//		/*Now, for this particular misfit object, make sure we plug into the elements: the observation, and the weights.*/
+			//		for(Object* & object : elements->objects){
+			//			Element* element=xDynamicCast<Element*>(object);
+			//			element->InputCreate(misfit_observation_s[j],inputs,iomodel,misfit_observation_M_s[j],misfit_observation_N_s[j],obs_vector_type,StringToEnumx(misfit_observation_string_s[j]),7);
+			//			element->InputCreate(misfit_weights_s[j],inputs,iomodel,misfit_weights_M_s[j],misfit_weights_N_s[j],weight_vector_type,StringToEnumx(misfit_weights_string_s[j]),7);
+			//		}
+
+			//	}
+
+			//	/*Free resources:*/
+			//	for(j=0;j<nummisfits;j++){
+			//		char* string=NULL;
+			//		IssmDouble* matrix = NULL;
+			//		string = misfit_definitionstring_s[j];		xDelete<char>(string);
+			//		string = misfit_observation_string_s[j];	xDelete<char>(string);
+			//		string = misfit_model_string_s[j];			xDelete<char>(string);
+			//		string = misfit_weights_string_s[j];		xDelete<char>(string);
+			//		string = misfit_name_s[j];    xDelete<char>(string);
+			//		string = misfit_timeinterpolation_s[j];    xDelete<char>(string);
+			//		matrix = misfit_observation_s[j]; xDelete<IssmDouble>(matrix);
+			//		matrix = misfit_weights_s[j]; xDelete<IssmDouble>(matrix);
+			//	}
+			//	xDelete<char*>(misfit_name_s);
+			//	xDelete<char*>(misfit_model_string_s);
+			//	xDelete<char*>(misfit_definitionstring_s);
+			//	xDelete<IssmDouble*>(misfit_observation_s);
+			//	xDelete<char*>(misfit_observation_string_s);
+			//	xDelete<int>(misfit_observation_M_s);
+			//	xDelete<int>(misfit_observation_N_s);
+			//	xDelete<int>(misfit_local_s);
+			//	xDelete<char*>(misfit_timeinterpolation_s);
+			//	xDelete<IssmDouble*>(misfit_weights_s);
+			//	xDelete<int>(misfit_weights_M_s);
+			//	xDelete<int>(misfit_weights_N_s);
+			//	xDelete<char*>(misfit_weights_string_s);
+			//	/*}}}*/
+			//}
 			else if (output_definition_enums[i]==CfsurfacesquareEnum){
 				/*Deal with cfsurfacesquare: {{{*/
 
@@ -544,6 +636,60 @@ void CreateOutputDefinitions(Elements* elements,Parameters* parameters,Inputs* i
             xDelete<int>(cfrheogradt_weights_N_s);
             /*}}}*/
          }
+			else if (output_definition_enums[i]==CfbasalfloatingicemeltabsgradtransientEnum){
+				/*Deal with cfbasalfloatingicemeltabsgradtransient: {{{*/
+
+				/*cfbasalfloatingicemeltabsgrad variables: */
+				int          num_cfbasalfloatingicemeltabsgradtransients, test;
+				char**       cfmeltgradt_name_s                = NULL;
+				char**       cfmeltgradt_definitionstring_s    = NULL;
+				IssmDouble** cfmeltgradt_weights_s             = NULL;
+				int*         cfmeltgradt_weights_M_s           = NULL;
+				int*         cfmeltgradt_weights_N_s           = NULL;
+				char**       cfmeltgradt_weights_string_s      = NULL;
+
+				/*Fetch name, model_string, observation, observation_string, etc ... (see src/m/classes/cfbasalfloatingicemeltabsgradtransient.m): */
+				iomodel->FetchMultipleData(&cfmeltgradt_name_s,&num_cfbasalfloatingicemeltabsgradtransients,                                                        "md.cfbasalfloatingicemeltabsgradtransient.name");
+				iomodel->FetchMultipleData(&cfmeltgradt_definitionstring_s,&num_cfbasalfloatingicemeltabsgradtransients,                                            "md.cfbasalfloatingicemeltabsgradtransient.definitionstring");
+				iomodel->FetchMultipleData(&cfmeltgradt_weights_s,&cfmeltgradt_weights_M_s,&cfmeltgradt_weights_N_s,&test,             "md.cfbasalfloatingicemeltabsgradtransient.weights");
+
+				for(j=0;j<num_cfbasalfloatingicemeltabsgradtransients;j++){
+
+					if (cfmeltgradt_weights_M_s[j]!=iomodel->numberofvertices+1) _error_("weights should be a P1 time series");
+
+					/*extract data times from last row of observations*/
+					IssmDouble *datatimes = xNew<IssmDouble>(cfmeltgradt_weights_N_s[j]);
+					for(int k=0;k<cfmeltgradt_weights_N_s[j];k++) datatimes[k] = (cfmeltgradt_weights_s[j])[cfmeltgradt_weights_N_s[j]*(cfmeltgradt_weights_M_s[j]-1)+k];
+
+					/*First create a cfbasalfloatingicemeltabsgradtransient object for that specific string:*/
+					output_definitions->AddObject(new Cfbasalfloatingicemeltabsgradtransient(cfmeltgradt_name_s[j],StringToEnumx(cfmeltgradt_definitionstring_s[j]), cfmeltgradt_weights_N_s[j], datatimes));
+
+					/*Now, for this particular cfbasalfloatingicemeltabsgrad object, make sure we plug into the elements: the observation, and the weights.*/
+					for(Object* & object : elements->objects){
+
+						Element* element=xDynamicCast<Element*>(object);
+
+						element->DatasetInputAdd(StringToEnumx(cfmeltgradt_definitionstring_s[j]),cfmeltgradt_weights_s[j],inputs,iomodel,cfmeltgradt_weights_M_s[j],cfmeltgradt_weights_N_s[j],1,WeightsSurfaceObservationEnum,WeightsSurfaceObservationEnum);
+
+					}
+				}
+
+				/*Free resources:*/
+            for(j=0;j<num_cfbasalfloatingicemeltabsgradtransients;j++){
+               char* string=NULL;
+               IssmDouble* matrix = NULL;
+
+               string = cfmeltgradt_definitionstring_s[j];    xDelete<char>(string);
+               string = cfmeltgradt_name_s[j];    xDelete<char>(string);
+               matrix = cfmeltgradt_weights_s[j]; xDelete<IssmDouble>(matrix);
+            }
+            xDelete<char*>(cfmeltgradt_name_s);
+            xDelete<char*>(cfmeltgradt_definitionstring_s);
+            xDelete<IssmDouble*>(cfmeltgradt_weights_s);
+            xDelete<int>(cfmeltgradt_weights_M_s);
+            xDelete<int>(cfmeltgradt_weights_N_s);
+            /*}}}*/
+         }
 			else if (output_definition_enums[i]==CfsurfacelogvelEnum){
 				/*Deal with cfsurfacelogvel: {{{*/
 
@@ -639,6 +785,83 @@ void CreateOutputDefinitions(Elements* elements,Parameters* parameters,Inputs* i
 				xDelete<int>(cfsurfacelogvel_weights_N);
 				xDelete<char*>(cfsurfacelogvel_weightstring);
 				xDelete<IssmDouble>(cfsurfacelogvel_datatime);
+				/*}}}*/
+			}
+			else if (output_definition_enums[i]==CfsurfacelogveltransientEnum){
+				/*Deal with cfsurfacelogveltransient: {{{*/
+
+				/*cfsurfacelogveltransient variables: */
+				int          num_cfsurfacelogveltransients,test;
+				char       **cfslvt_name_s                = NULL;
+				char       **cfslvt_definitionstring_s    = NULL;
+				IssmDouble **cfslvt_vxobs                 = NULL;
+				IssmDouble **cfslvt_vyobs                 = NULL;
+				char       **cfslvt_vxobsstring_s         = NULL;
+				char       **cfslvt_vyobsstring_s         = NULL;
+				int         *cfslvt_observations_M         = NULL;
+				int         *cfslvt_observations_N         = NULL;
+				IssmDouble **cfslvt_weights               = NULL;
+				int         *cfslvt_weights_M             = NULL;
+				int         *cfslvt_weights_N             = NULL;
+				char       **cfslvt_weightsstring_s       = NULL;
+
+
+				iomodel->FetchMultipleData(&cfslvt_name_s,&num_cfsurfacelogveltransients,"md.cfsurfacelogveltransient.name");
+				iomodel->FetchMultipleData(&cfslvt_definitionstring_s,&test,"md.cfsurfacelogveltransient.definitionstring");
+				iomodel->FetchMultipleData(&cfslvt_vxobs,&cfslvt_observations_M,&cfslvt_observations_N,&test, "md.cfsurfacelogveltransient.vxobs");
+				iomodel->FetchMultipleData(&cfslvt_vxobsstring_s,&test,"md.cfsurfacelogveltransient.vxobs_string");
+				iomodel->FetchMultipleData(&cfslvt_vyobs,&cfslvt_observations_M,&cfslvt_observations_N,&test, "md.cfsurfacelogveltransient.vyobs"); //assume same vxobs and vyobs dimensions
+				iomodel->FetchMultipleData(&cfslvt_vyobsstring_s,&test,"md.cfsurfacelogveltransient.vyobs_string");
+				iomodel->FetchMultipleData(&cfslvt_weights,&cfslvt_weights_M,&cfslvt_weights_N, &test,"md.cfsurfacelogveltransient.weights");
+				iomodel->FetchMultipleData(&cfslvt_weightsstring_s,&test,"md.cfsurfacelogveltransient.weights_string");
+
+				for(j=0;j<num_cfsurfacelogveltransients;j++){
+
+				/*Check that we can use P1 inputs*/
+				if (cfslvt_observations_M[j]!=(iomodel->numberofvertices+1)) _error_("observations should be a P1 time series");
+				if (cfslvt_weights_M[j]!=iomodel->numberofvertices+1)        _error_("weights should be a P1 time series");
+					_assert_(cfslvt_observations_N[j]>0);
+
+					/*extract data times from last row of observations*/
+					IssmDouble *datatimes = xNew<IssmDouble>(cfslvt_observations_N[j]);
+					for(int k=0;k<cfslvt_observations_N[j];k++) datatimes[k] = (cfslvt_vxobs[j])[cfslvt_observations_N[j]*(cfslvt_weights_M[j]-1)+k];
+
+					/*First create a cfsurfacelogveltransient object for that specific string (cfslvt_model_string_s[j]):*/
+					output_definitions->AddObject(new Cfsurfacelogveltransient(cfslvt_name_s[j], StringToEnumx(cfslvt_definitionstring_s[j]), cfslvt_observations_N[j],datatimes ));
+					xDelete<IssmDouble>(datatimes);
+
+					/*Now, for this particular cfsurfacelogveltransient object, make sure we plug into the elements: the observation, and the weights.*/
+					for(Object* & object : elements->objects){
+						Element* element=xDynamicCast<Element*>(object);
+						element->DatasetInputAdd(StringToEnumx(cfslvt_definitionstring_s[j]),cfslvt_vxobs[j],inputs,iomodel,cfslvt_observations_M[j],cfslvt_observations_N[j],1,StringToEnumx(cfslvt_vxobsstring_s[j]),VxObsEnum);
+						element->DatasetInputAdd(StringToEnumx(cfslvt_definitionstring_s[j]),cfslvt_vyobs[j],inputs,iomodel,cfslvt_observations_M[j],cfslvt_observations_N[j],1,StringToEnumx(cfslvt_vyobsstring_s[j]),VyObsEnum);
+						element->DatasetInputAdd(StringToEnumx(cfslvt_definitionstring_s[j]),cfslvt_weights[j],inputs,iomodel,cfslvt_weights_M[j],cfslvt_weights_N[j],1,StringToEnumx(cfslvt_weightsstring_s[j]),WeightsSurfaceObservationEnum);
+					}
+				}
+
+				/*Free resources:*/
+				for(j=0;j<num_cfsurfacelogveltransients;j++){
+					char* string=NULL;
+					IssmDouble* matrix = NULL;
+					string = cfslvt_definitionstring_s[j];		xDelete<char>(string);
+					string = cfslvt_vxobsstring_s[j];			xDelete<char>(string);
+					string = cfslvt_vyobsstring_s[j];			xDelete<char>(string);
+					string = cfslvt_name_s[j];    xDelete<char>(string);
+					matrix = cfslvt_vxobs[j]; xDelete<IssmDouble>(matrix);
+					matrix = cfslvt_vyobs[j]; xDelete<IssmDouble>(matrix);
+					matrix = cfslvt_weights[j]; xDelete<IssmDouble>(matrix);
+				}
+				xDelete<char*>(cfslvt_name_s);
+				xDelete<char*>(cfslvt_vxobsstring_s);
+				xDelete<char*>(cfslvt_vyobsstring_s);
+				xDelete<char*>(cfslvt_definitionstring_s);
+				xDelete<IssmDouble*>(cfslvt_vxobs);
+				xDelete<IssmDouble*>(cfslvt_vyobs);
+				xDelete<int>(cfslvt_observations_M);
+				xDelete<int>(cfslvt_observations_N);
+				xDelete<IssmDouble*>(cfslvt_weights);
+				xDelete<int>(cfslvt_weights_M);
+				xDelete<int>(cfslvt_weights_N);
 				/*}}}*/
 			}
 			else if (output_definition_enums[i]==CflevelsetmisfitEnum){

@@ -455,6 +455,7 @@
 	SamplingRobinEnum
 	SamplingSeedEnum
 	SaveResultsEnum
+	SaveFinalResultsEnum
 	SolidearthPartitionIceEnum
 	SolidearthPartitionHydroEnum
 	SolidearthPartitionOceanEnum
@@ -964,6 +965,11 @@
 	IceEnum
 	IceMaskNodeActivationEnum
 	InputEnum
+	InitialThicknessEnum
+	InitialFrictionCoefficientEnum
+	InitialMaterialsRheologyBEnum
+	InitialBasalforcingsFloatingiceMeltingRateEnum
+	InitialSmbEnum
 	InversionCostFunctionsCoefficientsEnum
 	InversionSurfaceObsEnum
 	InversionThicknessObsEnum
@@ -1297,6 +1303,7 @@
 	SurfaceLogVelMisfitEnum
 	SurfaceLogVxVyMisfitEnum
 	SurfaceObservationEnum
+	SurfaceObservationReferenceEnum
 	SurfaceRelVelMisfitEnum
 	SurfaceSlopeXEnum
 	SurfaceSlopeYEnum
@@ -1355,6 +1362,11 @@
 	WeightsVxObservationEnum
 	WeightsVyObservationEnum
 	WeightsSurfaceObservationEnum
+	WeightsInitialThicknessEnum
+	WeightsInitialFrictionCoefficientEnum
+	WeightsInitialMaterialsRheologyBEnum
+	WeightsInitialBasalforcingsFloatingiceMeltingRateEnum
+	WeightsInitialSmbEnum
 	OldAccumulatedDeltaBottomPressureEnum
 	OldAccumulatedDeltaIceThicknessEnum
 	OldAccumulatedDeltaTwsEnum
@@ -3404,7 +3416,9 @@
 	CfdragcoeffabsgradtransientEnum
 	CfrheologybbarabsgradEnum
 	CfrheologybbarabsgradtransientEnum
+	CfbasalfloatingicemeltabsgradtransientEnum
 	CfsurfacelogvelEnum
+	CfsurfacelogveltransientEnum
 	CfsurfacesquareEnum
 	CfsurfacesquaretransientEnum
 	CflevelsetmisfitEnum
@@ -4234,6 +4248,7 @@ function EnumToString(enum::IssmEnum)
 	if(enum==SamplingRobinEnum) return "SamplingRobin" end
 	if(enum==SamplingSeedEnum) return "SamplingSeed" end
 	if(enum==SaveResultsEnum) return "SaveResults" end
+	if(enum==SaveFinalResultsEnum) return "SaveFinalResults" end
 	if(enum==SolidearthPartitionIceEnum) return "SolidearthPartitionIce" end
 	if(enum==SolidearthPartitionHydroEnum) return "SolidearthPartitionHydro" end
 	if(enum==SolidearthPartitionOceanEnum) return "SolidearthPartitionOcean" end
@@ -4743,6 +4758,11 @@ function EnumToString(enum::IssmEnum)
 	if(enum==IceEnum) return "Ice" end
 	if(enum==IceMaskNodeActivationEnum) return "IceMaskNodeActivation" end
 	if(enum==InputEnum) return "Input" end
+	if(enum==InitialThicknessEnum) return "InitialThickness" end
+	if(enum==InitialFrictionCoefficientEnum) return "InitialFrictionCoefficient" end
+	if(enum==InitialMaterialsRheologyBEnum) return "InitialMaterialsRheologyB" end
+	if(enum==InitialBasalforcingsFloatingiceMeltingRateEnum) return "InitialBasalforcingsFloatingiceMeltingRate" end
+	if(enum==InitialSmbEnum) return "InitialSmb" end
 	if(enum==InversionCostFunctionsCoefficientsEnum) return "InversionCostFunctionsCoefficients" end
 	if(enum==InversionSurfaceObsEnum) return "InversionSurfaceObs" end
 	if(enum==InversionThicknessObsEnum) return "InversionThicknessObs" end
@@ -5076,6 +5096,7 @@ function EnumToString(enum::IssmEnum)
 	if(enum==SurfaceLogVelMisfitEnum) return "SurfaceLogVelMisfit" end
 	if(enum==SurfaceLogVxVyMisfitEnum) return "SurfaceLogVxVyMisfit" end
 	if(enum==SurfaceObservationEnum) return "SurfaceObservation" end
+	if(enum==SurfaceObservationReferenceEnum) return "SurfaceObservationReference" end
 	if(enum==SurfaceRelVelMisfitEnum) return "SurfaceRelVelMisfit" end
 	if(enum==SurfaceSlopeXEnum) return "SurfaceSlopeX" end
 	if(enum==SurfaceSlopeYEnum) return "SurfaceSlopeY" end
@@ -5134,6 +5155,11 @@ function EnumToString(enum::IssmEnum)
 	if(enum==WeightsVxObservationEnum) return "WeightsVxObservation" end
 	if(enum==WeightsVyObservationEnum) return "WeightsVyObservation" end
 	if(enum==WeightsSurfaceObservationEnum) return "WeightsSurfaceObservation" end
+	if(enum==WeightsInitialThicknessEnum) return "WeightsInitialThickness" end
+	if(enum==WeightsInitialFrictionCoefficientEnum) return "WeightsInitialFrictionCoefficient" end
+	if(enum==WeightsInitialMaterialsRheologyBEnum) return "WeightsInitialMaterialsRheologyB" end
+	if(enum==WeightsInitialBasalforcingsFloatingiceMeltingRateEnum) return "WeightsInitialBasalforcingsFloatingiceMeltingRate" end
+	if(enum==WeightsInitialSmbEnum) return "WeightsInitialSmb" end
 	if(enum==OldAccumulatedDeltaBottomPressureEnum) return "OldAccumulatedDeltaBottomPressure" end
 	if(enum==OldAccumulatedDeltaIceThicknessEnum) return "OldAccumulatedDeltaIceThickness" end
 	if(enum==OldAccumulatedDeltaTwsEnum) return "OldAccumulatedDeltaTws" end
@@ -7183,7 +7209,9 @@ function EnumToString(enum::IssmEnum)
 	if(enum==CfdragcoeffabsgradtransientEnum) return "Cfdragcoeffabsgradtransient" end
 	if(enum==CfrheologybbarabsgradEnum) return "Cfrheologybbarabsgrad" end
 	if(enum==CfrheologybbarabsgradtransientEnum) return "Cfrheologybbarabsgradtransient" end
+	if(enum==CfbasalfloatingicemeltabsgradtransientEnum) return "Cfbasalfloatingicemeltabsgradtransient" end
 	if(enum==CfsurfacelogvelEnum) return "Cfsurfacelogvel" end
+	if(enum==CfsurfacelogveltransientEnum) return "Cfsurfacelogveltransient" end
 	if(enum==CfsurfacesquareEnum) return "Cfsurfacesquare" end
 	if(enum==CfsurfacesquaretransientEnum) return "Cfsurfacesquaretransient" end
 	if(enum==CflevelsetmisfitEnum) return "Cflevelsetmisfit" end
@@ -8013,6 +8041,7 @@ function StringToEnum(name::String)
 	if(name=="SamplingRobin") return SamplingRobinEnum  end
 	if(name=="SamplingSeed") return SamplingSeedEnum  end
 	if(name=="SaveResults") return SaveResultsEnum  end
+	if(name=="SaveFinalResults") return SaveFinalResultsEnum  end
 	if(name=="SolidearthPartitionIce") return SolidearthPartitionIceEnum  end
 	if(name=="SolidearthPartitionHydro") return SolidearthPartitionHydroEnum  end
 	if(name=="SolidearthPartitionOcean") return SolidearthPartitionOceanEnum  end
@@ -8522,6 +8551,11 @@ function StringToEnum(name::String)
 	if(name=="Ice") return IceEnum  end
 	if(name=="IceMaskNodeActivation") return IceMaskNodeActivationEnum  end
 	if(name=="Input") return InputEnum  end
+	if(name=="InitialThickness") return InitialThicknessEnum  end
+	if(name=="InitialFrictionCoefficient") return InitialFrictionCoefficientEnum  end
+	if(name=="InitialMaterialsRheologyB") return InitialMaterialsRheologyBEnum  end
+	if(name=="InitialBasalforcingsFloatingiceMeltingRate") return InitialBasalforcingsFloatingiceMeltingRateEnum  end
+	if(name=="InitialSmb") return InitialSmbEnum  end
 	if(name=="InversionCostFunctionsCoefficients") return InversionCostFunctionsCoefficientsEnum  end
 	if(name=="InversionSurfaceObs") return InversionSurfaceObsEnum  end
 	if(name=="InversionThicknessObs") return InversionThicknessObsEnum  end
@@ -8855,6 +8889,7 @@ function StringToEnum(name::String)
 	if(name=="SurfaceLogVelMisfit") return SurfaceLogVelMisfitEnum  end
 	if(name=="SurfaceLogVxVyMisfit") return SurfaceLogVxVyMisfitEnum  end
 	if(name=="SurfaceObservation") return SurfaceObservationEnum  end
+	if(name=="SurfaceObservationReference") return SurfaceObservationReferenceEnum  end
 	if(name=="SurfaceRelVelMisfit") return SurfaceRelVelMisfitEnum  end
 	if(name=="SurfaceSlopeX") return SurfaceSlopeXEnum  end
 	if(name=="SurfaceSlopeY") return SurfaceSlopeYEnum  end
@@ -8913,6 +8948,11 @@ function StringToEnum(name::String)
 	if(name=="WeightsVxObservation") return WeightsVxObservationEnum  end
 	if(name=="WeightsVyObservation") return WeightsVyObservationEnum  end
 	if(name=="WeightsSurfaceObservation") return WeightsSurfaceObservationEnum  end
+	if(name=="WeightsInitialThickness") return WeightsInitialThicknessEnum  end
+	if(name=="WeightsInitialFrictionCoefficient") return WeightsInitialFrictionCoefficientEnum  end
+	if(name=="WeightsInitialMaterialsRheologyB") return WeightsInitialMaterialsRheologyBEnum  end
+	if(name=="WeightsInitialBasalforcingsFloatingiceMeltingRate") return WeightsInitialBasalforcingsFloatingiceMeltingRateEnum  end
+	if(name=="WeightsInitialSmb") return WeightsInitialSmbEnum  end
 	if(name=="OldAccumulatedDeltaBottomPressure") return OldAccumulatedDeltaBottomPressureEnum  end
 	if(name=="OldAccumulatedDeltaIceThickness") return OldAccumulatedDeltaIceThicknessEnum  end
 	if(name=="OldAccumulatedDeltaTws") return OldAccumulatedDeltaTwsEnum  end
@@ -10962,7 +11002,9 @@ function StringToEnum(name::String)
 	if(name=="Cfdragcoeffabsgradtransient") return CfdragcoeffabsgradtransientEnum  end
 	if(name=="Cfrheologybbarabsgrad") return CfrheologybbarabsgradEnum  end
 	if(name=="Cfrheologybbarabsgradtransient") return CfrheologybbarabsgradtransientEnum  end
+	if(name=="Cfbasalfloatingicemeltabsgradtransient") return CfbasalfloatingicemeltabsgradtransientEnum  end
 	if(name=="Cfsurfacelogvel") return CfsurfacelogvelEnum  end
+	if(name=="Cfsurfacelogveltransient") return CfsurfacelogveltransientEnum  end
 	if(name=="Cfsurfacesquare") return CfsurfacesquareEnum  end
 	if(name=="Cfsurfacesquaretransient") return CfsurfacesquaretransientEnum  end
 	if(name=="Cflevelsetmisfit") return CflevelsetmisfitEnum  end

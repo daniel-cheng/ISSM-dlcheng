@@ -270,6 +270,11 @@ void  DataSet::Marshall(MarshallHandle* marshallhandle){ /*{{{*/
 				cfsurf->Marshall(marshallhandle);
 				this->AddObject(cfsurf);
 			}
+			else if(obj_enum==CfsurfacelogveltransientEnum){
+				Cfsurfacelogveltransient* cfsurf=new Cfsurfacelogveltransient();
+				cfsurf->Marshall(marshallhandle);
+				this->AddObject(cfsurf);
+			}
 			else if(obj_enum==CfdragcoeffabsgradEnum){
 				Cfdragcoeffabsgrad* cfdragcoeff=new Cfdragcoeffabsgrad();
 				cfdragcoeff->Marshall(marshallhandle);
@@ -285,6 +290,16 @@ void  DataSet::Marshall(MarshallHandle* marshallhandle){ /*{{{*/
 				cfrheologybbarabsgrad->Marshall(marshallhandle);
 				this->AddObject(cfrheologybbarabsgrad);
 			}
+			else if(obj_enum==CfrheologybbarabsgradtransientEnum){
+				Cfrheologybbarabsgradtransient* cfrheologybbar=new Cfrheologybbarabsgradtransient();
+				cfrheologybbar->Marshall(marshallhandle);
+				this->AddObject(cfrheologybbar);
+			}
+			else if(obj_enum==CfbasalfloatingicemeltabsgradtransientEnum){
+				Cfbasalfloatingicemeltabsgradtransient* cfbasalfloatingicemelt=new Cfbasalfloatingicemeltabsgradtransient();
+				cfbasalfloatingicemelt->Marshall(marshallhandle);
+				this->AddObject(cfbasalfloatingicemelt);
+			}
 			else if(obj_enum==NodalvalueEnum){
 				Nodalvalue* nodalvalue=new Nodalvalue();
 				nodalvalue->Marshall(marshallhandle);
@@ -294,6 +309,11 @@ void  DataSet::Marshall(MarshallHandle* marshallhandle){ /*{{{*/
 				Massfluxatgate<IssmDouble>* massfluxgate=new Massfluxatgate<IssmDouble>();
 				massfluxgate->Marshall(marshallhandle);
 				this->AddObject(massfluxgate);
+			}
+			else if(obj_enum==RegionaloutputEnum){
+				Regionaloutput* regionoutput=new Regionaloutput();
+				regionoutput->Marshall(marshallhandle);
+				this->AddObject(regionoutput);
 			}
 			else if(obj_enum==ChannelEnum){
 				Channel* channel=new Channel();

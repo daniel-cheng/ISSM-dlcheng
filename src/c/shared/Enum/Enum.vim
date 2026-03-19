@@ -466,6 +466,7 @@ syn keyword cConstant SamplingRequestedOutputsEnum
 syn keyword cConstant SamplingRobinEnum
 syn keyword cConstant SamplingSeedEnum
 syn keyword cConstant SaveResultsEnum
+syn keyword cConstant SaveFinalResultsEnum
 syn keyword cConstant SolidearthPartitionIceEnum
 syn keyword cConstant SolidearthPartitionHydroEnum
 syn keyword cConstant SolidearthPartitionOceanEnum
@@ -975,6 +976,11 @@ syn keyword cConstant DebrisMaskNodeActivationEnum
 syn keyword cConstant IceEnum
 syn keyword cConstant IceMaskNodeActivationEnum
 syn keyword cConstant InputEnum
+syn keyword cConstant InitialThicknessEnum
+syn keyword cConstant InitialFrictionCoefficientEnum
+syn keyword cConstant InitialMaterialsRheologyBEnum
+syn keyword cConstant InitialBasalforcingsFloatingiceMeltingRateEnum
+syn keyword cConstant InitialSmbEnum
 syn keyword cConstant InversionCostFunctionsCoefficientsEnum
 syn keyword cConstant InversionSurfaceObsEnum
 syn keyword cConstant InversionThicknessObsEnum
@@ -1308,6 +1314,7 @@ syn keyword cConstant SurfaceOldEnum
 syn keyword cConstant SurfaceLogVelMisfitEnum
 syn keyword cConstant SurfaceLogVxVyMisfitEnum
 syn keyword cConstant SurfaceObservationEnum
+syn keyword cConstant SurfaceObservationReferenceEnum
 syn keyword cConstant SurfaceRelVelMisfitEnum
 syn keyword cConstant SurfaceSlopeXEnum
 syn keyword cConstant SurfaceSlopeYEnum
@@ -1366,6 +1373,11 @@ syn keyword cConstant WeightsMeltObservationEnum
 syn keyword cConstant WeightsVxObservationEnum
 syn keyword cConstant WeightsVyObservationEnum
 syn keyword cConstant WeightsSurfaceObservationEnum
+syn keyword cConstant WeightsInitialThicknessEnum
+syn keyword cConstant WeightsInitialFrictionCoefficientEnum
+syn keyword cConstant WeightsInitialMaterialsRheologyBEnum
+syn keyword cConstant WeightsInitialBasalforcingsFloatingiceMeltingRateEnum
+syn keyword cConstant WeightsInitialSmbEnum
 syn keyword cConstant OldAccumulatedDeltaBottomPressureEnum
 syn keyword cConstant OldAccumulatedDeltaIceThicknessEnum
 syn keyword cConstant OldAccumulatedDeltaTwsEnum
@@ -3415,7 +3427,9 @@ syn keyword cConstant CfdragcoeffabsgradEnum
 syn keyword cConstant CfdragcoeffabsgradtransientEnum
 syn keyword cConstant CfrheologybbarabsgradEnum
 syn keyword cConstant CfrheologybbarabsgradtransientEnum
+syn keyword cConstant CfbasalfloatingicemeltabsgradtransientEnum
 syn keyword cConstant CfsurfacelogvelEnum
+syn keyword cConstant CfsurfacelogveltransientEnum
 syn keyword cConstant CfsurfacesquareEnum
 syn keyword cConstant CfsurfacesquaretransientEnum
 syn keyword cConstant CflevelsetmisfitEnum
@@ -3799,12 +3813,14 @@ syn keyword cType ArrayInput
 syn keyword cType BarystaticContributions
 syn keyword cType BoolInput
 syn keyword cType BoolParam
+syn keyword cType Cfbasalfloatingicemeltabsgradtransient
 syn keyword cType Cfdragcoeffabsgrad
 syn keyword cType Cfdragcoeffabsgradtransient
 syn keyword cType Cflevelsetmisfit
 syn keyword cType Cfrheologybbarabsgrad
 syn keyword cType Cfrheologybbarabsgradtransient
 syn keyword cType Cfsurfacelogvel
+syn keyword cType Cfsurfacelogveltransient
 syn keyword cType Cfsurfacesquare
 syn keyword cType Cfsurfacesquaretransient
 syn keyword cType Channel
@@ -3947,7 +3963,6 @@ syn keyword cType FreeSurfaceBaseAnalysis
 syn keyword cType FreeSurfaceTopAnalysis
 syn keyword cType GLheightadvectionAnalysis
 syn keyword cType HydrologyArmapwAnalysis
-syn keyword cType HydrologyCuasAnalysis
 syn keyword cType HydrologyDCEfficientAnalysis
 syn keyword cType HydrologyDCInefficientAnalysis
 syn keyword cType HydrologyGlaDSAnalysis

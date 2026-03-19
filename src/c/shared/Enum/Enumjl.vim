@@ -459,6 +459,7 @@ syn keyword juliaConstC SamplingRequestedOutputsEnum
 syn keyword juliaConstC SamplingRobinEnum
 syn keyword juliaConstC SamplingSeedEnum
 syn keyword juliaConstC SaveResultsEnum
+syn keyword juliaConstC SaveFinalResultsEnum
 syn keyword juliaConstC SolidearthPartitionIceEnum
 syn keyword juliaConstC SolidearthPartitionHydroEnum
 syn keyword juliaConstC SolidearthPartitionOceanEnum
@@ -968,6 +969,11 @@ syn keyword juliaConstC DebrisMaskNodeActivationEnum
 syn keyword juliaConstC IceEnum
 syn keyword juliaConstC IceMaskNodeActivationEnum
 syn keyword juliaConstC InputEnum
+syn keyword juliaConstC InitialThicknessEnum
+syn keyword juliaConstC InitialFrictionCoefficientEnum
+syn keyword juliaConstC InitialMaterialsRheologyBEnum
+syn keyword juliaConstC InitialBasalforcingsFloatingiceMeltingRateEnum
+syn keyword juliaConstC InitialSmbEnum
 syn keyword juliaConstC InversionCostFunctionsCoefficientsEnum
 syn keyword juliaConstC InversionSurfaceObsEnum
 syn keyword juliaConstC InversionThicknessObsEnum
@@ -1301,6 +1307,7 @@ syn keyword juliaConstC SurfaceOldEnum
 syn keyword juliaConstC SurfaceLogVelMisfitEnum
 syn keyword juliaConstC SurfaceLogVxVyMisfitEnum
 syn keyword juliaConstC SurfaceObservationEnum
+syn keyword juliaConstC SurfaceObservationReferenceEnum
 syn keyword juliaConstC SurfaceRelVelMisfitEnum
 syn keyword juliaConstC SurfaceSlopeXEnum
 syn keyword juliaConstC SurfaceSlopeYEnum
@@ -1359,6 +1366,11 @@ syn keyword juliaConstC WeightsMeltObservationEnum
 syn keyword juliaConstC WeightsVxObservationEnum
 syn keyword juliaConstC WeightsVyObservationEnum
 syn keyword juliaConstC WeightsSurfaceObservationEnum
+syn keyword juliaConstC WeightsInitialThicknessEnum
+syn keyword juliaConstC WeightsInitialFrictionCoefficientEnum
+syn keyword juliaConstC WeightsInitialMaterialsRheologyBEnum
+syn keyword juliaConstC WeightsInitialBasalforcingsFloatingiceMeltingRateEnum
+syn keyword juliaConstC WeightsInitialSmbEnum
 syn keyword juliaConstC OldAccumulatedDeltaBottomPressureEnum
 syn keyword juliaConstC OldAccumulatedDeltaIceThicknessEnum
 syn keyword juliaConstC OldAccumulatedDeltaTwsEnum
@@ -3408,7 +3420,9 @@ syn keyword juliaConstC CfdragcoeffabsgradEnum
 syn keyword juliaConstC CfdragcoeffabsgradtransientEnum
 syn keyword juliaConstC CfrheologybbarabsgradEnum
 syn keyword juliaConstC CfrheologybbarabsgradtransientEnum
+syn keyword juliaConstC CfbasalfloatingicemeltabsgradtransientEnum
 syn keyword juliaConstC CfsurfacelogvelEnum
+syn keyword juliaConstC CfsurfacelogveltransientEnum
 syn keyword juliaConstC CfsurfacesquareEnum
 syn keyword juliaConstC CfsurfacesquaretransientEnum
 syn keyword juliaConstC CflevelsetmisfitEnum

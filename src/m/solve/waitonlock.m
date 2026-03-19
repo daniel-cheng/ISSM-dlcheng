@@ -66,7 +66,7 @@ while (ispresent==0 & elapsedtime<timelimit)
 		ispresent=(exist(lockfilename,'file') & exist(logfilename,'file'));
 		elapsedtime=etime(clock,starttime)/60;
 	else
-		pause(5);
+		pause(60);
 		elapsedtime=etime(clock,starttime);
 		fprintf('\rchecking for job completion (time: %i min %i sec)      ',floor(elapsedtime/60),floor(rem(elapsedtime,60)));
 		elapsedtime=elapsedtime/60; %converts time from sec to min

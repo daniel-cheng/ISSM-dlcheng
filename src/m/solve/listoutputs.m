@@ -232,6 +232,11 @@ DebrisMaskNodeActivation
 Ice
 IceMaskNodeActivation
 Input
+InitialThickness
+InitialFrictionCoefficient
+InitialMaterialsRheologyB
+InitialBasalforcingsFloatingiceMeltingRate
+InitialSmb
 InversionCostFunctionsCoefficients
 InversionSurfaceObs
 InversionThicknessObs
@@ -565,6 +570,7 @@ SurfaceOld
 SurfaceLogVelMisfit
 SurfaceLogVxVyMisfit
 SurfaceObservation
+SurfaceObservationReference
 SurfaceRelVelMisfit
 SurfaceSlopeX
 SurfaceSlopeY
@@ -623,6 +629,11 @@ WeightsMeltObservation
 WeightsVxObservation
 WeightsVyObservation
 WeightsSurfaceObservation
+WeightsInitialThickness
+WeightsInitialFrictionCoefficient
+WeightsInitialMaterialsRheologyB
+WeightsInitialBasalforcingsFloatingiceMeltingRate
+WeightsInitialSmb
 OldAccumulatedDeltaBottomPressure
 OldAccumulatedDeltaIceThickness
 OldAccumulatedDeltaTws

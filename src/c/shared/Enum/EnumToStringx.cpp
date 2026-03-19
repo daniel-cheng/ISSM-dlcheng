@@ -978,6 +978,11 @@ const char* EnumToStringx(int en){
 		case IceEnum : return "Ice";
 		case IceMaskNodeActivationEnum : return "IceMaskNodeActivation";
 		case InputEnum : return "Input";
+		case InitialThicknessEnum : return "InitialThickness";
+		case InitialFrictionCoefficientEnum : return "InitialFrictionCoefficient";
+		case InitialMaterialsRheologyBEnum : return "InitialMaterialsRheologyB";
+		case InitialBasalforcingsFloatingiceMeltingRateEnum : return "InitialBasalforcingsFloatingiceMeltingRate";
+		case InitialSmbEnum : return "InitialSmb";
 		case InversionCostFunctionsCoefficientsEnum : return "InversionCostFunctionsCoefficients";
 		case InversionSurfaceObsEnum : return "InversionSurfaceObs";
 		case InversionThicknessObsEnum : return "InversionThicknessObs";
@@ -1311,6 +1316,7 @@ const char* EnumToStringx(int en){
 		case SurfaceLogVelMisfitEnum : return "SurfaceLogVelMisfit";
 		case SurfaceLogVxVyMisfitEnum : return "SurfaceLogVxVyMisfit";
 		case SurfaceObservationEnum : return "SurfaceObservation";
+		case SurfaceObservationReferenceEnum : return "SurfaceObservationReference";
 		case SurfaceRelVelMisfitEnum : return "SurfaceRelVelMisfit";
 		case SurfaceSlopeXEnum : return "SurfaceSlopeX";
 		case SurfaceSlopeYEnum : return "SurfaceSlopeY";
@@ -1369,6 +1375,11 @@ const char* EnumToStringx(int en){
 		case WeightsVxObservationEnum : return "WeightsVxObservation";
 		case WeightsVyObservationEnum : return "WeightsVyObservation";
 		case WeightsSurfaceObservationEnum : return "WeightsSurfaceObservation";
+		case WeightsInitialThicknessEnum : return "WeightsInitialThickness";
+		case WeightsInitialFrictionCoefficientEnum : return "WeightsInitialFrictionCoefficient";
+		case WeightsInitialMaterialsRheologyBEnum : return "WeightsInitialMaterialsRheologyB";
+		case WeightsInitialBasalforcingsFloatingiceMeltingRateEnum : return "WeightsInitialBasalforcingsFloatingiceMeltingRate";
+		case WeightsInitialSmbEnum : return "WeightsInitialSmb";
 		case OldAccumulatedDeltaBottomPressureEnum : return "OldAccumulatedDeltaBottomPressure";
 		case OldAccumulatedDeltaIceThicknessEnum : return "OldAccumulatedDeltaIceThickness";
 		case OldAccumulatedDeltaTwsEnum : return "OldAccumulatedDeltaTws";
@@ -3418,7 +3429,9 @@ const char* EnumToStringx(int en){
 		case CfdragcoeffabsgradtransientEnum : return "Cfdragcoeffabsgradtransient";
 		case CfrheologybbarabsgradEnum : return "Cfrheologybbarabsgrad";
 		case CfrheologybbarabsgradtransientEnum : return "Cfrheologybbarabsgradtransient";
+		case CfbasalfloatingicemeltabsgradtransientEnum : return "Cfbasalfloatingicemeltabsgradtransient";
 		case CfsurfacelogvelEnum : return "Cfsurfacelogvel";
+		case CfsurfacelogveltransientEnum : return "Cfsurfacelogveltransient";
 		case CfsurfacesquareEnum : return "Cfsurfacesquare";
 		case CfsurfacesquaretransientEnum : return "Cfsurfacesquaretransient";
 		case CflevelsetmisfitEnum : return "Cflevelsetmisfit";
