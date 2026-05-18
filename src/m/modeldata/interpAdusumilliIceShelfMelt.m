@@ -1,4 +1,4 @@
-function output = interpAdusumilliIceShelfMelt(X,Y)
+function [melt, melt_err] = interpAdusumilliIceShelfMelt(X,Y)
 %INTERPADUSUMILLIICESHELFMELT - imports basal melt rates from (Adusumilli et al., 2020).
 %   About the data: "Average basal melt rates for Antarctic ice shelves for the 2010–2018 period at 
 %   high spatial resolution, estimated using CryoSat-2 data. This data file was last updated on 2020-06-11."
@@ -36,5 +36,13 @@ data_interp = double(h5read(filename,'/w_b_interp'));
 data = data';
 disp(['   -- Adusumilli Ice Shelf Melt: interpolating melt data']);
 data(isnan(data)) = data_interp(isnan(data));
-output = InterpFromGrid(xdata,ydata,data,X(:),Y(:));
-output = reshape(output,size(X,1),size(X,2));
+melt = InterpFromGrid(xdata,ydata,data,X(:),Y(:));
+melt = reshape(melt,size(X,1),size(X,2));
+
+data_err = double(h5read(filename,'/w_b_uncert'));
+data_err = data_err';
+disp(['   -- Adusumilli Ice Shelf Melt Error: interpolating melt data']);
+melt_err = InterpFromGrid(xdata,ydata,data_err,X(:),Y(:));
+melt_err = reshape(melt_err,size(X,1),size(X,2));
+
+

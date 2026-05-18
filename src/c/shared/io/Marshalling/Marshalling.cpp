@@ -10,6 +10,9 @@
 
 #include "./Marshalling.h"
 #include "../../Numerics/isnan.h"
+#include <execinfo.h>                                                                                                                            
+#include <stdio.h>
+#include <stdlib.h>
 
 WriteCheckpointFunctor::WriteCheckpointFunctor(char** pmarshalled_data_in) : MarshallHandle(MARSHALLING_WRITE){/*{{{*/
 	this->pmarshalled_data = pmarshalled_data_in;
@@ -85,9 +88,28 @@ void RegisterInputFunctor::call(IssmDouble & value){/*{{{*/
 
 	this->data->registerInput(value);
 }/*}}}*/
+void print_stacktrace() {
+	void *array[10];
+	size_t size;
+	char **strings;
+
+	size = backtrace(array, 10);
+	strings = backtrace_symbols(array, size);
+
+	printf("Stack trace (%zd frames):\n", size);
+	for (size_t i = 0; i < size; i++) {
+		printf("%s\n", strings[i]);
+	}
+
+	free(strings);
+}
+
 void RegisterInputFunctor::call(IssmDouble* & value,int size){/*{{{*/
 	if(value){
 		for(int i=0;i<size;i++){
+			if (xIsNan<IssmDouble>(value[i])) {
+				print_stacktrace();
+			}
 			_assert_(!xIsNan<IssmDouble>(value[i]));
 			this->data->registerInput(value[i]);
 		}
@@ -108,6 +130,9 @@ void RegisterOutputFunctor::call(IssmDouble & value){/*{{{*/
 void RegisterOutputFunctor::call(IssmDouble* & value,int size){/*{{{*/
 	if(value){
 		for(int i=0;i<size;i++){
+			if (xIsNan<IssmDouble>(value[i])) {
+				print_stacktrace();
+			}
 			_assert_(!xIsNan<IssmDouble>(value[i]));
 			this->data->registerOutput(value[i]);
 		}

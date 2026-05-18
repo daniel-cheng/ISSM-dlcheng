@@ -28,6 +28,7 @@ ISSM_CONFIG='\
 	--with-m1qn3-dir=${ISSM_DIR}/externalpackages/m1qn3/install \
 	--with-medipack-dir="${ISSM_DIR}/externalpackages/medipack/install" \
 	--with-codipack-dir="${ISSM_DIR}/externalpackages/codipack/install" \
+	--with-proj-dir="${ISSM_DIR}/externalpackages/proj/install" \
 	--with-semic-dir=${ISSM_DIR}/externalpackages/semic/install \
 '
 
@@ -46,6 +47,8 @@ EXTERNALPACKAGES="
 	codipack	install.sh
 	semic		install.sh
 	shell2junit install.sh
+	sqlite		install-static.sh
+	proj		install-8.sh
 "
 
 #---------#

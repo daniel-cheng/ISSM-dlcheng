@@ -7,7 +7,7 @@
 int main(int argc,char **argv){
 
 	/*Initialize exception trapping: */
-	ExceptionTrapBegin();
+	//ExceptionTrapBegin();
 
 	/*Initialize environment (MPI, PETSC, MUMPS, etc ...)*/
 	ISSM_MPI_Comm comm_init=EnvironmentInit(argc,argv);
@@ -34,7 +34,7 @@ int main(int argc,char **argv){
 	EnvironmentFinalize();
 
 	/*Finalize exception trapping: */
-	ExceptionTrapEnd();
+	//ExceptionTrapEnd();
 
 	/*Return unix success: */
 	return 0; 
