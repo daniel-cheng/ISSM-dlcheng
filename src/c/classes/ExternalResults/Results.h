@@ -22,6 +22,7 @@ class Results: public DataSet{
 		/*Mehthos*/
 		int AddResult(ExternalResult* result);
 		ExternalResult* FindResult(int result_enum);
+		ExternalResult* FindResult(const char* result_name, int result_step);
 		void Write(Parameters* parameters);
 };
 #endif //ifndef _RESULTS_H_

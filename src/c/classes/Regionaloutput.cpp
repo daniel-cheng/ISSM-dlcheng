@@ -19,6 +19,16 @@
 
 /*}}}*/
 
+Regionaloutput::Regionaloutput(){/*{{{*/
+
+	this->definitionenum = -1;
+	this->outputname = NULL;
+	this->name = NULL;
+	this->mask = NULL;
+	this->M = 0.;
+
+}
+/*}}}*/
 Regionaloutput::Regionaloutput(char* in_name, int in_definitionenum, char* in_outputname, IssmDouble* maskin, int Min){ /*{{{*/
 
 	this->definitionenum=in_definitionenum;
@@ -63,7 +73,14 @@ int Regionaloutput::Id(void){/*{{{*/
 }
 /*}}}*/
 void Regionaloutput::Marshall(MarshallHandle* marshallhandle){/*{{{*/
-	_error_("not implemented yet!");
+	int object_enum=RegionaloutputEnum;
+	marshallhandle->call(object_enum);
+
+	marshallhandle->call(this->definitionenum);
+	marshallhandle->call(this->outputname);
+	marshallhandle->call(this->name);
+	marshallhandle->call(this->mask);
+	marshallhandle->call(this->M);
 }
 /*}}}*/
 int Regionaloutput::ObjectEnum(void){/*{{{*/
