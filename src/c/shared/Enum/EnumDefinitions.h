@@ -3522,6 +3522,7 @@ enum definitions{
 	CfdragcoeffabsgradtransientEnum,
 	CfrheologybbarabsgradEnum,
 	CfrheologybbarabsgradtransientEnum,
+	Cfbasalfloatingicemeltabsgradtransient,
 	CfsurfacelogvelEnum,
 	CfsurfacesquareEnum,
 	CfsurfacesquaretransientEnum,

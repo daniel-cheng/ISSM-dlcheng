@@ -3916,12 +3916,14 @@ syn keyword cType ArrayInput
 syn keyword cType BarystaticContributions
 syn keyword cType BoolInput
 syn keyword cType BoolParam
+syn keyword cType Cfbasalfloatingicemeltabsgradtransient
 syn keyword cType Cfdragcoeffabsgrad
 syn keyword cType Cfdragcoeffabsgradtransient
 syn keyword cType Cflevelsetmisfit
 syn keyword cType Cfrheologybbarabsgrad
 syn keyword cType Cfrheologybbarabsgradtransient
 syn keyword cType Cfsurfacelogvel
+syn keyword cType Cfsurfacelogveltransient
 syn keyword cType Cfsurfacesquare
 syn keyword cType Cfsurfacesquaretransient
 syn keyword cType Channel
